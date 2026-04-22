@@ -10,8 +10,8 @@ class Post(Base):
     title = Column(String(200), nullable=False)
     content = Column(Text, nullable=False)
 
-    page_name = Column(String(50), nullable=False)
-    content_type = Column(String(50), nullable=False)
+    page_name = Column(String(50), nullable=False, index=True)
+    content_type = Column(String(50), nullable=False, index=True)
 
     category = Column(String(100), nullable=True)
     ai_analysis = Column(Text, nullable=True)
@@ -21,8 +21,17 @@ class Post(Base):
     embedding = Column(Text, nullable=True)
     search_vector = Column(Text, nullable=True)
 
+    image_url = Column(String(500), nullable=True)
+
     likes_count = Column(Integer, nullable=False, default=0)
     dislikes_count = Column(Integer, nullable=False, default=0)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
