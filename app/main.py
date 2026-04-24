@@ -14,6 +14,8 @@ from app.models.comment import Comment
 from app.routers.user import router as user_router
 from app.routers.post import router as post_router
 from app.routers.comment import router as comment_router
+from app.models.user_onboarding import UserOnboarding
+from app.routers.onboarding import router as onboarding_router
 
 app = FastAPI(title="Huaxia Backend API")
 
@@ -32,7 +34,7 @@ Base.metadata.create_all(bind=engine)
 app.include_router(post_router)
 app.include_router(user_router)
 app.include_router(comment_router)
-
+app.include_router(onboarding_router)
 
 @app.get("/")
 def root():

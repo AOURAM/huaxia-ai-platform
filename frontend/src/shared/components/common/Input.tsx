@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes } from 'react';
+
 import { cn } from '@/lib/utils';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -9,7 +10,11 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export function Input({ label, error, className, ...props }: InputProps) {
   return (
     <div className="flex w-full flex-col gap-2">
-      {label ? <label className="ml-1 text-sm font-medium text-brand-on-surface/70">{label}</label> : null}
+      {label ? (
+        <label className="ml-1 text-sm font-medium text-brand-on-surface/70">
+          {label}
+        </label>
+      ) : null}
 
       <input
         className={cn(

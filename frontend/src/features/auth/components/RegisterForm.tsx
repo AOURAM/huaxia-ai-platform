@@ -50,7 +50,7 @@ export function RegisterForm() {
     visible: {
     opacity: 1,
     y: 0,
-    transition: { type: 'spring', damping: 24, stiffness: 110 },
+    transition: { type: 'spring' as const, damping: 24, stiffness: 110 },
     },
 };
 
@@ -101,7 +101,7 @@ export function RegisterForm() {
     });
 
     setStatus('success');
-    window.setTimeout(() => navigate(ROUTES.home), 700);
+    window.setTimeout(() => navigate(ROUTES.onboarding), 700);
     } catch (error) {
     setStatus('error');
     setErrorMessage(error instanceof ApiError ? error.message : 'Unable to create your account right now.');

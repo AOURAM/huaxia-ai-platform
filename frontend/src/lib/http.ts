@@ -1,3 +1,4 @@
+import { getStoredToken } from '@/lib/authStorage';
 import type { ApiErrorPayload } from '@/types/api';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
@@ -18,12 +19,14 @@ export function buildApiUrl(path: string) {
 
 export async function http<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
+  const token = getStoredToken();
 
   try {
     response = await fetch(buildApiUrl(path), {
       ...init,
       headers: {
         Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(init?.headers ?? {}),
       },
     });

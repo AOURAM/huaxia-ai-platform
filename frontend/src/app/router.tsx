@@ -7,6 +7,8 @@ import { ROUTES } from '@/constants/routes';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { HomeFeedPage } from '@/features/feed/pages/HomeFeedPage';
+import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
+import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export function AppRouter() {
@@ -34,11 +36,31 @@ export function AppRouter() {
         />
 
         <Route
+          path={ROUTES.onboarding}
+          element={
+            <ProtectedRoute>
+              <OnboardingPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path={ROUTES.home}
           element={
             <ProtectedRoute>
               <AppLayout>
                 <HomeFeedPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.postDetail}
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PostDetailPage />
               </AppLayout>
             </ProtectedRoute>
           }
