@@ -88,10 +88,10 @@ export function PostDetailPage() {
           <h1 className="mb-3 font-serif text-3xl font-bold">Invalid post</h1>
           <button
             type="button"
-            onClick={() => navigate(ROUTES.home)}
+            onClick={() => navigate(-1)}
             className="rounded-xl bg-brand-primary px-6 py-3 font-bold text-white"
           >
-            Back to feed
+            Back
           </button>
         </div>
       </div>
@@ -165,10 +165,10 @@ export function PostDetailPage() {
             </p>
             <button
               type="button"
-              onClick={() => navigate(ROUTES.home)}
+              onClick={() => navigate(-1)}
               className="rounded-xl bg-brand-primary px-6 py-3 font-bold text-white"
             >
-              Back to feed
+              Back
             </button>
           </div>
         </div>
@@ -183,11 +183,11 @@ export function PostDetailPage() {
           >
             <button
               type="button"
-              onClick={() => navigate(ROUTES.home)}
+              onClick={() => navigate(-1)}
               className="mb-8 inline-flex items-center gap-2 text-sm font-bold text-brand-on-surface/55 transition hover:text-brand-primary"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to feed
+              Back
             </button>
 
             <header className="space-y-6">
@@ -459,7 +459,7 @@ export function PostDetailPage() {
                 to={ROUTES.home}
                 className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-brand-primary/20 py-3 text-xs font-black uppercase tracking-widest text-brand-primary transition hover:bg-brand-primary/5"
               >
-                Back to Feed
+                Back
                 <ChevronRight className="h-3.5 w-3.5" />
               </Link>
             </div>

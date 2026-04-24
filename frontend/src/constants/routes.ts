@@ -3,6 +3,7 @@ export const ROUTES = {
   register: '/register',
   onboarding: '/onboarding',
   home: '/feed',
+  cities: '/cities',
   postDetail: '/posts/:postId',
 } as const;
 

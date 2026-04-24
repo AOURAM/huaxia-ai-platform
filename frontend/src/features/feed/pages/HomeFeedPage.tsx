@@ -1,8 +1,10 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { Bell, Home, LogOut, UserCircle } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { searchPosts } from '@/api/posts';
+import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { CreatePostCard } from '@/features/feed/components/CreatePostCard';
 import { FeedToolbar } from '@/features/feed/components/FeedToolbar';
@@ -54,19 +56,40 @@ export function HomeFeedPage() {
           <div className="font-serif text-2xl font-bold text-brand-primary">Huaxia</div>
 
           <div className="hidden items-center gap-8 md:flex">
-            {['Home', 'Cities', 'Universities', 'Culture', 'Daily Life'].map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={`flex h-16 items-center border-b-2 text-sm font-bold transition ${
-                  item === 'Home'
-                    ? 'border-brand-primary text-brand-primary'
-                    : 'border-transparent text-brand-on-surface/60 hover:text-brand-primary'
-                }`}
-              >
-                {item}
-              </button>
-            ))}
+            <Link
+              to={ROUTES.home}
+              className="flex h-16 items-center border-b-2 border-brand-primary text-sm font-bold text-brand-primary"
+            >
+              Home
+            </Link>
+
+            <Link
+              to={ROUTES.cities}
+              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
+            >
+              Cities
+            </Link>
+
+            <button
+              type="button"
+              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60"
+            >
+              Universities
+            </button>
+
+            <button
+              type="button"
+              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60"
+            >
+              Culture
+            </button>
+
+            <button
+              type="button"
+              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60"
+            >
+              Daily Life
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -126,6 +149,7 @@ export function HomeFeedPage() {
             {tabs.map((tab) => (
               <button
                 key={tab}
+                type="button"
                 onClick={() => setActiveTab(tab)}
                 className={`relative px-6 py-4 text-sm font-bold tracking-wide transition ${
                   activeTab === tab

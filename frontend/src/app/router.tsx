@@ -6,6 +6,7 @@ import { PublicLayout } from '@/app/layouts/PublicLayout';
 import { ROUTES } from '@/constants/routes';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
+import { CitiesPage } from '@/features/cities/pages/CitiesPage';
 import { HomeFeedPage } from '@/features/feed/pages/HomeFeedPage';
 import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
 import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
@@ -50,6 +51,17 @@ export function AppRouter() {
             <ProtectedRoute>
               <AppLayout>
                 <HomeFeedPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.cities}
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <CitiesPage />
               </AppLayout>
             </ProtectedRoute>
           }
