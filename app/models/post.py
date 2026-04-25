@@ -35,3 +35,4 @@ class Post(Base):
     )
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    city_id = Column(Integer, ForeignKey("cities.id"), nullable=True, index=True)

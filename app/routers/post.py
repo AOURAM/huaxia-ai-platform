@@ -3,26 +3,26 @@ import math
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.models.post import Post
-from app.models.user import User
-from app.models.comment import Comment
-from app.models.post_reaction import PostReaction
-from app.schemas.post import (
-    PostResponse,
-    HybridSearchRequest,
-    GlobalSearchRequest,
-    PostReactionRequest,
-    PostDetailResponse,
-)
 from app.core.dependencies import get_current_user
+from app.database import get_db
+from app.models.city import City
+from app.models.comment import Comment
+from app.models.post import Post
+from app.models.post_reaction import PostReaction
+from app.models.user import User
+from app.schemas.post import (
+    GlobalSearchRequest,
+    HybridSearchRequest,
+    PostDetailResponse,
+    PostReactionRequest,
+    PostResponse,
+)
 from app.services.ai_service import analyze_post
 from app.services.embedding_service import generate_embedding
-from app.schemas.comment import CommentDetailResponse
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
@@ -65,6 +65,23 @@ def save_uploaded_image(image: UploadFile | None) -> str | None:
 
     return f"/uploads/posts/{filename}"
 
+def validate_city_for_post(page_name: str, city_id: int | None, db: Session) -> int | None:
+    if page_name != "cities":
+        return None
+
+    if city_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="city_id is required when page_name is cities",
+        )
+
+    city = db.query(City).filter(City.id == city_id).first()
+
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found")
+
+    return city.id
+
 
 def serialize_post_response(post: Post) -> dict:
     return {
@@ -82,7 +99,9 @@ def serialize_post_response(post: Post) -> dict:
         "dislikes_count": post.dislikes_count,
         "created_at": post.created_at,
         "user_id": post.user_id,
+        "city_id": post.city_id,
     }
+
 
 def serialize_comment_detail(comment: Comment, username: str) -> dict:
     return {
@@ -95,12 +114,14 @@ def serialize_comment_detail(comment: Comment, username: str) -> dict:
         "username": username,
     }
 
+
 @router.post("/", response_model=PostResponse)
 def create_post(
     title: str = Form(...),
     content: str = Form(...),
     page_name: str = Form(...),
     content_type: str = Form(...),
+    city_id: int | None = Form(None),
     image: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -123,6 +144,8 @@ def create_post(
             detail="content_type must be one of: question, guide, experience, news, tip",
         )
 
+    validated_city_id = validate_city_for_post(page_name, city_id, db)
+
     image_url = save_uploaded_image(image)
 
     ai_result = analyze_post(content)
@@ -133,6 +156,7 @@ def create_post(
         content=content,
         page_name=page_name,
         content_type=content_type,
+        city_id=validated_city_id,
         category=ai_result["category"],
         ai_analysis=ai_result["analysis"],
         summary=ai_result["summary"],
@@ -167,7 +191,7 @@ def create_post(
 
 @router.get("/", response_model=list[PostResponse])
 def get_all_posts(db: Session = Depends(get_db)):
-    posts = db.query(Post).all()
+    posts = db.query(Post).order_by(Post.created_at.desc()).all()
     return [serialize_post_response(post) for post in posts]
 
 
@@ -176,7 +200,12 @@ def get_current_user_posts(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    posts = db.query(Post).filter(Post.user_id == current_user.id).all()
+    posts = (
+        db.query(Post)
+        .filter(Post.user_id == current_user.id)
+        .order_by(Post.created_at.desc())
+        .all()
+    )
     return [serialize_post_response(post) for post in posts]
 
 
@@ -194,6 +223,7 @@ def search_posts(
             content,
             page_name,
             content_type,
+            city_id,
             category,
             ai_analysis,
             summary,
@@ -246,6 +276,7 @@ def search_posts(
                 "content": post["content"],
                 "page_name": post["page_name"],
                 "content_type": post["content_type"],
+                "city_id": post["city_id"],
                 "category": post["category"],
                 "ai_analysis": post["ai_analysis"],
                 "summary": post["summary"],
@@ -280,6 +311,7 @@ def search_posts_globally(
             content,
             page_name,
             content_type,
+            city_id,
             category,
             ai_analysis,
             summary,
@@ -332,6 +364,7 @@ def search_posts_globally(
                 "content": post["content"],
                 "page_name": post["page_name"],
                 "content_type": post["content_type"],
+                "city_id": post["city_id"],
                 "category": post["category"],
                 "ai_analysis": post["ai_analysis"],
                 "summary": post["summary"],
@@ -378,6 +411,7 @@ def get_top_posts(
                 "title": post.title,
                 "page_name": post.page_name,
                 "content_type": post.content_type,
+                "city_id": post.city_id,
                 "category": post.category,
                 "summary": post.summary,
                 "image_url": post.image_url,
@@ -400,6 +434,7 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Post not found")
 
     return serialize_post_response(post)
+
 
 @router.get("/{post_id}/detail", response_model=PostDetailResponse)
 def get_post_detail(
@@ -427,10 +462,14 @@ def get_post_detail(
 
     total_comments = len(comments)
 
-    existing_reaction = db.query(PostReaction).filter(
-        PostReaction.user_id == current_user.id,
-        PostReaction.post_id == post_id,
-    ).first()
+    existing_reaction = (
+        db.query(PostReaction)
+        .filter(
+            PostReaction.user_id == current_user.id,
+            PostReaction.post_id == post_id,
+        )
+        .first()
+    )
 
     user_reaction = existing_reaction.reaction_type if existing_reaction else None
 
@@ -443,6 +482,9 @@ def get_post_detail(
             Post.page_name == post.page_name,
         )
 
+        if post.page_name == "cities" and post.city_id is not None:
+            query = query.filter(Post.city_id == post.city_id)
+
         posts = query.all()
 
         for candidate_post in posts:
@@ -452,7 +494,9 @@ def get_post_detail(
             post_embedding = json.loads(candidate_post.embedding)
             similarity = cosine_similarity(target_embedding, post_embedding)
 
-            raw_engagement = (candidate_post.likes_count * 2) - candidate_post.dislikes_count
+            raw_engagement = (
+                candidate_post.likes_count * 2
+            ) - candidate_post.dislikes_count
             engagement_score = max(raw_engagement, 0) / 10
             engagement_score = min(engagement_score, 1.0)
 
@@ -467,6 +511,7 @@ def get_post_detail(
                     "title": candidate_post.title,
                     "page_name": candidate_post.page_name,
                     "content_type": candidate_post.content_type,
+                    "city_id": candidate_post.city_id,
                     "category": candidate_post.category,
                     "summary": candidate_post.summary,
                     "image_url": candidate_post.image_url,
@@ -495,6 +540,7 @@ def update_post(
     content: str | None = Form(None),
     page_name: str | None = Form(None),
     content_type: str | None = Form(None),
+    city_id: int | None = Form(None),
     image: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -510,6 +556,8 @@ def update_post(
     allowed_pages = {"cities", "universities", "culture", "daily_life"}
     allowed_content_types = {"question", "guide", "experience", "news", "tip"}
 
+    final_page_name = post.page_name
+
     if page_name is not None:
         page_name = page_name.strip().lower()
         if page_name not in allowed_pages:
@@ -517,6 +565,7 @@ def update_post(
                 status_code=400,
                 detail="page_name must be one of: cities, universities, culture, daily_life",
             )
+        final_page_name = page_name
 
     if content_type is not None:
         content_type = content_type.strip().lower()
@@ -525,6 +574,12 @@ def update_post(
                 status_code=400,
                 detail="content_type must be one of: question, guide, experience, news, tip",
             )
+
+    if final_page_name == "cities":
+        final_city_id = city_id if city_id is not None else post.city_id
+        post.city_id = validate_city_for_post(final_page_name, final_city_id, db)
+    else:
+        post.city_id = None
 
     content_changed = content is not None and content != post.content
 
@@ -608,10 +663,14 @@ def react_to_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    existing_reaction = db.query(PostReaction).filter(
-        PostReaction.user_id == current_user.id,
-        PostReaction.post_id == post_id,
-    ).first()
+    existing_reaction = (
+        db.query(PostReaction)
+        .filter(
+            PostReaction.user_id == current_user.id,
+            PostReaction.post_id == post_id,
+        )
+        .first()
+    )
 
     if existing_reaction:
         if existing_reaction.reaction_type != request.reaction_type:
@@ -623,7 +682,6 @@ def react_to_post(
                 post.likes_count -= 1
 
             existing_reaction.reaction_type = request.reaction_type
-
     else:
         new_reaction = PostReaction(
             user_id=current_user.id,
@@ -665,6 +723,9 @@ def get_post_recommendations(
     if scope == "page":
         query = query.filter(Post.page_name == target_post.page_name)
 
+    if scope == "city" and target_post.city_id is not None:
+        query = query.filter(Post.city_id == target_post.city_id)
+
     posts = query.all()
 
     recommendations = []
@@ -691,6 +752,7 @@ def get_post_recommendations(
                 "title": post.title,
                 "page_name": post.page_name,
                 "content_type": post.content_type,
+                "city_id": post.city_id,
                 "category": post.category,
                 "summary": post.summary,
                 "image_url": post.image_url,

@@ -14,6 +14,7 @@ export interface CreatePostPayload {
   page_name: PageName;
   content_type: ContentType;
   image?: File | null;
+  city_id?: number | null;
 }
 
 export interface SearchPostsPayload {
@@ -67,7 +68,10 @@ export function createPost(payload: CreatePostPayload) {
   body.set('content', payload.content);
   body.set('page_name', payload.page_name);
   body.set('content_type', payload.content_type);
-
+  
+if (payload.city_id) {
+  body.set('city_id', String(payload.city_id));
+}
   if (payload.image) {
     body.set('image', payload.image);
   }

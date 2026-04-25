@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from pydantic import BaseModel, field_validator
+
 from app.schemas.comment import CommentDetailResponse
 
 ALLOWED_PAGES = {"cities", "universities", "culture", "daily_life"}
@@ -30,6 +32,7 @@ class PostCreate(BaseModel):
     page_name: str
     content_type: str
     category: str | None = None
+    city_id: int | None = None
 
     @field_validator("page_name")
     @classmethod
@@ -47,6 +50,7 @@ class PostUpdate(BaseModel):
     content: str | None = None
     page_name: str | None = None
     content_type: str | None = None
+    city_id: int | None = None
 
     @field_validator("page_name")
     @classmethod
@@ -77,6 +81,7 @@ class PostResponse(BaseModel):
     dislikes_count: int
     created_at: datetime
     user_id: int
+    city_id: int | None = None
     image_url: str | None = None
 
     class Config:
@@ -87,6 +92,7 @@ class HybridSearchRequest(BaseModel):
     query: str
     page_name: str | None = None
     content_type: str | None = None
+    city_id: int | None = None
     limit: int = 5
 
     @field_validator("page_name")
@@ -129,7 +135,8 @@ class GlobalSearchRequest(BaseModel):
         if value < 0 or value > 1:
             raise ValueError("min_score must be between 0 and 1")
         return value
-    
+
+
 class PostReactionRequest(BaseModel):
     reaction_type: str
 
@@ -140,6 +147,7 @@ class PostReactionRequest(BaseModel):
         if value not in {"like", "dislike"}:
             raise ValueError("reaction_type must be 'like' or 'dislike'")
         return value
+
 
 class RecommendationResponse(BaseModel):
     id: int
