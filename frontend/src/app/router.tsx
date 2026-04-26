@@ -12,6 +12,7 @@ import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
 import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
 import { SectionPage } from '@/features/sections/pages/SectionPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { UniversitiesPage } from '@/features/universities/pages/UniversitiesPage';
 
 export function AppRouter() {
   return (
@@ -73,7 +74,7 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <AppLayout>
-                <SectionPage />
+                <UniversitiesPage />
               </AppLayout>
             </ProtectedRoute>
           }
