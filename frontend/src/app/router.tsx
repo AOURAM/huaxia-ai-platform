@@ -10,7 +10,6 @@ import { CitiesPage } from '@/features/cities/pages/CitiesPage';
 import { HomeFeedPage } from '@/features/feed/pages/HomeFeedPage';
 import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
 import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
-import { SectionPage } from '@/features/sections/pages/SectionPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { UniversitiesPage } from '@/features/universities/pages/UniversitiesPage';
 
