@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -10,6 +12,42 @@ from app.schemas.city import CityCreate, CityOut, CityUpdate
 from app.schemas.post import PostResponse
 
 router = APIRouter(prefix="/cities", tags=["cities"])
+
+
+def parse_tags(tags_value):
+    if tags_value is None:
+        return None
+
+    if isinstance(tags_value, list):
+        return tags_value
+
+    if isinstance(tags_value, str):
+        try:
+            return json.loads(tags_value)
+        except json.JSONDecodeError:
+            return []
+
+    return []
+
+
+def serialize_post_response(post: Post) -> dict:
+    return {
+        "id": post.id,
+        "title": post.title,
+        "content": post.content,
+        "page_name": post.page_name,
+        "content_type": post.content_type,
+        "city_id": post.city_id,
+        "category": post.category,
+        "ai_analysis": post.ai_analysis,
+        "summary": post.summary,
+        "tags": parse_tags(post.tags),
+        "image_url": post.image_url,
+        "likes_count": post.likes_count,
+        "dislikes_count": post.dislikes_count,
+        "created_at": post.created_at,
+        "user_id": post.user_id,
+    }
 
 
 @router.get("/", response_model=list[CityOut])
@@ -46,21 +84,7 @@ def create_city(
     if existing_city:
         raise HTTPException(status_code=400, detail="City slug already exists")
 
-    city = City(
-        slug=payload.slug,
-        name=payload.name,
-        province=payload.province,
-        region=payload.region,
-        lat=payload.lat,
-        lng=payload.lng,
-        description=payload.description,
-        image_url=payload.image_url,
-        tags=payload.tags,
-        student_summary=payload.student_summary,
-        cost_level=payload.cost_level,
-        popular_universities=payload.popular_universities,
-        highlights=payload.highlights,
-    )
+    city = City(**payload.model_dump())
 
     db.add(city)
     db.commit()
@@ -109,9 +133,15 @@ def get_city_posts(slug: str, db: Session = Depends(get_db)):
     if not city:
         raise HTTPException(status_code=404, detail="City not found")
 
-    return (
-        db.query(Post)
-        .filter(Post.page_name == "cities", Post.city_id == city.id)
-        .order_by(Post.created_at.desc())
-        .all()
+    posts = (
+    db.query(Post)
+    .filter(
+        Post.page_name == "cities",
+        Post.city_id == city.id,
+        Post.city_id.isnot(None),
     )
+    .order_by(Post.created_at.desc())
+    .all()
+)
+
+    return [serialize_post_response(post) for post in posts]

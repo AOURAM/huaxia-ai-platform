@@ -10,6 +10,7 @@ import { CitiesPage } from '@/features/cities/pages/CitiesPage';
 import { HomeFeedPage } from '@/features/feed/pages/HomeFeedPage';
 import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
 import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
+import { SectionPage } from '@/features/sections/pages/SectionPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export function AppRouter() {
@@ -62,6 +63,17 @@ export function AppRouter() {
             <ProtectedRoute>
               <AppLayout>
                 <CitiesPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.universities}
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <SectionPage />
               </AppLayout>
             </ProtectedRoute>
           }

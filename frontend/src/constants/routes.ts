@@ -4,6 +4,9 @@ export const ROUTES = {
   onboarding: '/onboarding',
   home: '/feed',
   cities: '/cities',
+  universities: '/universities',
+  culture: '/culture',
+  dailyLife: '/daily-life',
   postDetail: '/posts/:postId',
 } as const;
 
