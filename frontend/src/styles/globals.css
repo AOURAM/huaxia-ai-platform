@@ -1,38 +1,172 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;500;600&display=swap");
-@import "tailwindcss";
-@import "./theme.css";
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;500;600;700&display=swap');
+@import 'tailwindcss';
 
-@layer base {
-  * {
-    box-sizing: border-box;
-  }
+@theme {
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
 
-  html,
-  body,
-  #root {
-    min-height: 100%;
-  }
-
-  body {
-    @apply bg-brand-surface text-brand-on-surface font-sans;
-    margin: 0;
-  }
-
-  button,
-  input,
-  textarea,
-  select {
-    font: inherit;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
+  --color-brand-primary: #92000c;
+  --color-brand-primary-hover: #ba181b;
+  --color-brand-surface: #fff8f7;
+  --color-brand-on-surface: #201a1a;
+  --color-brand-outline: #e4beb9;
+  --color-brand-neutral-soft: #f7ebea;
+  --color-brand-success: #047857;
+  --color-brand-danger: #b91c1c;
+  --color-brand-accent: #c97a83;
 }
 
-@layer utilities {
-  .glass-morphism {
-    @apply border border-white/10 bg-white/10 backdrop-blur-xl;
-  }
+:root[data-theme='night'] {
+  --color-brand-primary: #f08a94;
+  --color-brand-primary-hover: #ff9fa8;
+  --color-brand-surface: #211719;
+  --color-brand-on-surface: #f7ecec;
+  --color-brand-outline: #5a3a3f;
+  --color-brand-neutral-soft: #302326;
+  --color-brand-success: #64d6a1;
+  --color-brand-danger: #ff9b9b;
+  --color-brand-accent: #d48b93;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  background: var(--color-brand-surface);
+}
+
+body {
+  margin: 0;
+  background: var(--color-brand-surface);
+  color: var(--color-brand-on-surface);
+  font-family: var(--font-sans);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(146, 0, 12, 0.18);
+}
+
+/* Night mode compatibility for existing light-mode utilities */
+
+:root[data-theme='night'] .bg-white {
+  background-color: #2a1d20 !important;
+}
+
+:root[data-theme='night'] .bg-brand-surface {
+  background-color: var(--color-brand-surface) !important;
+}
+
+:root[data-theme='night'] .bg-brand-neutral-soft {
+  background-color: var(--color-brand-neutral-soft) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface {
+  color: var(--color-brand-on-surface) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/75 {
+  color: rgba(247, 236, 236, 0.75) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/70 {
+  color: rgba(247, 236, 236, 0.7) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/65 {
+  color: rgba(247, 236, 236, 0.65) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/60 {
+  color: rgba(247, 236, 236, 0.6) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/55 {
+  color: rgba(247, 236, 236, 0.55) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/50 {
+  color: rgba(247, 236, 236, 0.5) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/45 {
+  color: rgba(247, 236, 236, 0.45) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/40 {
+  color: rgba(247, 236, 236, 0.4) !important;
+}
+
+:root[data-theme='night'] .text-brand-on-surface\/35 {
+  color: rgba(247, 236, 236, 0.35) !important;
+}
+
+:root[data-theme='night'] .border-brand-outline {
+  border-color: var(--color-brand-outline) !important;
+}
+
+:root[data-theme='night'] .border-brand-outline\/40 {
+  border-color: rgba(90, 58, 63, 0.4) !important;
+}
+
+:root[data-theme='night'] .border-brand-outline\/50 {
+  border-color: rgba(90, 58, 63, 0.5) !important;
+}
+
+:root[data-theme='night'] input,
+:root[data-theme='night'] textarea,
+:root[data-theme='night'] select {
+  color: var(--color-brand-on-surface);
+}
+
+:root[data-theme='night'] input::placeholder,
+:root[data-theme='night'] textarea::placeholder {
+  color: rgba(247, 236, 236, 0.38);
+}
+
+:root[data-theme='night'] .bg-red-50,
+:root[data-theme='night'] .bg-brand-danger\/10 {
+  background-color: rgba(255, 155, 155, 0.12) !important;
+}
+
+:root[data-theme='night'] .text-red-700,
+:root[data-theme='night'] .text-brand-danger {
+  color: #ffb0b0 !important;
+}
+
+:root[data-theme='night'] .border-red-200,
+:root[data-theme='night'] .border-brand-danger\/20 {
+  border-color: rgba(255, 155, 155, 0.28) !important;
+}
+
+.glass-morphism {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(24px);
 }

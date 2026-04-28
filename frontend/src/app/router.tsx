@@ -7,14 +7,15 @@ import { ROUTES } from '@/constants/routes';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { CitiesPage } from '@/features/cities/pages/CitiesPage';
+import { CulturePage } from '@/features/culture/pages/CulturePage';
+import { DailyLifePage } from '@/features/daily-life/pages/DailyLifePage';
 import { HomeFeedPage } from '@/features/feed/pages/HomeFeedPage';
 import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
 import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
-import { NotFoundPage } from '@/pages/NotFoundPage';
-import { UniversitiesPage } from '@/features/universities/pages/UniversitiesPage';
-import { CulturePage } from '@/features/culture/pages/CulturePage';
-import { DailyLifePage } from '@/features/daily-life/pages/DailyLifePage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
+import { SettingsPage } from '@/features/settings/pages/SettingsPage';
+import { UniversitiesPage } from '@/features/universities/pages/UniversitiesPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export function AppRouter() {
   return (
@@ -81,36 +82,51 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path={ROUTES.culture}
           element={
-          <ProtectedRoute>
-          <AppLayout>
-        <CulturePage />
-      </AppLayout>
-    </ProtectedRoute>
-  }
-/>
-      <Route
-      path={ROUTES.dailyLife}
-      element={
-        <ProtectedRoute>
-        <AppLayout>
-        <DailyLifePage />
-      </AppLayout>
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path={ROUTES.profile}
-  element={
-    <ProtectedRoute>
-      <AppLayout>
-        <ProfilePage />
-      </AppLayout>
-    </ProtectedRoute>
-  }
-/>
+            <ProtectedRoute>
+              <AppLayout>
+                <CulturePage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.dailyLife}
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <DailyLifePage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.profile}
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <ProfilePage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.settings}
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <SettingsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path={ROUTES.postDetail}
           element={

@@ -1,16 +1,4 @@
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;500;600&display=swap');
-
-@theme {
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Newsreader", ui-serif, Georgia, serif;
-
-  --color-brand-primary: #92000c;
-  --color-brand-primary-hover: #ba181b;
-  --color-brand-surface: #fff8f7;
-  --color-brand-on-surface: #201a1a;
-  --color-brand-outline: #e4beb9;
-  --color-brand-neutral-soft: #f7ebea;
-  --color-brand-success: #047857;
-  --color-brand-danger: #b91c1c;
-}
+/*
+  Theme tokens are defined in globals.css because this project uses Tailwind CSS v4.
+  Do not import Tailwind here.
+*/

@@ -22,7 +22,7 @@ export function CityMap({ cities, selectedCity, onSelectCity }: CityMapProps) {
       style: 'https://demotiles.maplibre.org/style.json',
       center: selectedCity ? [selectedCity.lng, selectedCity.lat] : [104.1954, 35.8617],
       zoom: 3.4,
-      attributionControl: true,
+      attributionControl: {},
     });
 
     mapRef.current.addControl(new maplibregl.NavigationControl(), 'top-left');

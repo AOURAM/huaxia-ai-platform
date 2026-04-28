@@ -3,17 +3,13 @@ import {
   Building2,
   FileText,
   GraduationCap,
-  LogOut,
   Search,
   Sparkles,
   WalletCards,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import { searchPosts } from '@/api/posts';
-import { ROUTES } from '@/constants/routes';
-import { useAuth } from '@/features/auth/hooks/useAuth';
 import { CreatePostCard } from '@/features/feed/components/CreatePostCard';
 import { TopPostsPanel } from '@/features/feed/components/TopPostsPanel';
 import { useAllPosts } from '@/features/feed/hooks/useAllPosts';
@@ -69,7 +65,6 @@ function getTabCount(posts: Post[], filter: DiscussionFilter) {
 }
 
 export function UniversitiesPage() {
-  const { logout } = useAuth();
   const { data: allPosts = [], isLoading, isError } = useAllPosts();
 
   const [query, setQuery] = useState('');
@@ -131,60 +126,6 @@ export function UniversitiesPage() {
 
   return (
     <div className="min-h-screen bg-brand-surface">
-      <nav className="sticky top-0 z-50 border-b border-brand-outline bg-brand-surface/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-4 md:px-6">
-          <Link to={ROUTES.home} className="font-serif text-2xl font-bold text-brand-primary">
-            Huaxia
-          </Link>
-
-          <div className="hidden items-center gap-8 md:flex">
-            <Link
-              to={ROUTES.home}
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
-            >
-              Home
-            </Link>
-
-            <Link
-              to={ROUTES.cities}
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
-            >
-              Cities
-            </Link>
-
-            <Link
-              to={ROUTES.universities}
-              className="flex h-16 items-center border-b-2 border-brand-primary text-sm font-bold text-brand-primary"
-            >
-              Universities
-            </Link>
-
-            <Link
-              to={ROUTES.culture}
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
-            >
-              Culture
-            </Link>
-
-            <Link
-              to={ROUTES.dailyLife}
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
-            >
-              Daily Life
-            </Link>
-          </div>
-
-          <button
-            type="button"
-            onClick={logout}
-            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-brand-on-surface/60 transition hover:bg-brand-neutral-soft hover:text-brand-danger"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </button>
-        </div>
-      </nav>
-
       <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 gap-8 px-4 py-8 md:px-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <main className="min-w-0 space-y-8">
           <section className="space-y-6">

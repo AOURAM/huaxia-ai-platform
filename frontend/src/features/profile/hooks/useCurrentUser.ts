@@ -5,6 +5,6 @@ import { getCurrentUser } from '@/api/users';
 export function useCurrentUser() {
   return useQuery({
     queryKey: ['current-user'],
-    queryFn: getCurrentUser,
+    queryFn: () => getCurrentUser(),
   });
 }

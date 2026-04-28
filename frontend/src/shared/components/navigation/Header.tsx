@@ -1,4 +1,4 @@
-import { LogOut, UserCircle } from 'lucide-react';
+import { LogOut, Settings, UserCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { ROUTES } from '@/constants/routes';
@@ -67,6 +67,19 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            to={ROUTES.settings}
+            className={`rounded-full p-2 transition hover:bg-brand-neutral-soft ${
+              isActivePath(location.pathname, ROUTES.settings)
+                ? 'text-brand-primary'
+                : 'text-brand-on-surface/55 hover:text-brand-primary'
+            }`}
+            title="Settings"
+            aria-label="Settings"
+          >
+            <Settings className="h-5 w-5" />
+          </Link>
+
           <Link
             to={ROUTES.profile}
             className={`rounded-full p-2 transition hover:bg-brand-neutral-soft ${

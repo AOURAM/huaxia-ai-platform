@@ -8,6 +8,7 @@ export const ROUTES = {
   culture: '/culture',
   dailyLife: '/daily-life',
   profile: '/profile',
+  settings: '/settings',
   postDetail: '/posts/:postId',
 } as const;
 

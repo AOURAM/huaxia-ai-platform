@@ -28,8 +28,18 @@ function formatJoinDate(dateValue?: string) {
 
 export function ProfilePage() {
   const { logout } = useAuth();
-  const { data: user, isLoading: isUserLoading, isError: isUserError } = useCurrentUser();
-  const { data: allPosts = [], isLoading: arePostsLoading, isError: arePostsError } = useAllPosts();
+
+  const {
+    data: user,
+    isLoading: isUserLoading,
+    isError: isUserError,
+  } = useCurrentUser();
+
+  const {
+    data: allPosts = [],
+    isLoading: arePostsLoading,
+    isError: arePostsError,
+  } = useAllPosts();
 
   const userPosts = user ? allPosts.filter((post) => post.user_id === user.id) : [];
 
@@ -118,9 +128,7 @@ export function ProfilePage() {
                     <ShieldCheck className="h-5 w-5" />
                   </div>
 
-                  <p className="font-serif text-xl font-bold text-brand-on-surface">
-                    Active
-                  </p>
+                  <p className="font-serif text-xl font-bold text-brand-on-surface">Active</p>
 
                   <p className="mt-1 text-sm font-semibold text-brand-on-surface/55">
                     Session status
