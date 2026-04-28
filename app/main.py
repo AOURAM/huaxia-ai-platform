@@ -13,12 +13,14 @@ from app.models.post_reaction import PostReaction
 from app.models.comment import Comment
 from app.models.user_onboarding import UserOnboarding
 from app.models.city import City
+from app.models.culture_event import CultureEvent
 
 from app.routers.user import router as user_router
 from app.routers.post import router as post_router
 from app.routers.comment import router as comment_router
 from app.routers.onboarding import router as onboarding_router
 from app.routers.city import router as city_router
+from app.routers.culture_event import router as culture_event_router
 
 
 app = FastAPI(title="Huaxia Backend API")
@@ -40,7 +42,7 @@ app.include_router(user_router)
 app.include_router(comment_router)
 app.include_router(onboarding_router)
 app.include_router(city_router)
-
+app.include_router(culture_event_router)
 
 @app.get("/")
 def root():

@@ -13,6 +13,7 @@ import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { UniversitiesPage } from '@/features/universities/pages/UniversitiesPage';
 import { CulturePage } from '@/features/culture/pages/CulturePage';
+import { DailyLifePage } from '@/features/daily-life/pages/DailyLifePage';
 
 export function AppRouter() {
   return (
@@ -85,6 +86,16 @@ export function AppRouter() {
           <ProtectedRoute>
           <AppLayout>
         <CulturePage />
+      </AppLayout>
+    </ProtectedRoute>
+  }
+/>
+      <Route
+      path={ROUTES.dailyLife}
+      element={
+        <ProtectedRoute>
+        <AppLayout>
+        <DailyLifePage />
       </AppLayout>
     </ProtectedRoute>
   }

@@ -1,4 +1,4 @@
-import { MessageCircle, MoreHorizontal } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
@@ -30,28 +30,20 @@ export function PostCard({ post }: PostCardProps) {
 
   return (
     <article className="group rounded-xl border border-brand-outline bg-white p-6 shadow-sm transition hover:border-brand-primary/40">
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <div className="mb-1 flex flex-wrap items-center gap-2">
-            <span className="font-bold text-brand-on-surface">User #{post.user_id}</span>
-            <span className="text-xs text-brand-on-surface/45">• {formatDate(post.created_at)}</span>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-brand-neutral-soft px-3 py-1 text-xs font-bold text-brand-on-surface/65">
-              {formatPageName(post.page_name)}
-            </span>
-            <ContentTypeBadge type={post.content_type} />
-            <CategoryBadge category={post.category} />
-          </div>
+      <div className="mb-4">
+        <div className="mb-1 flex flex-wrap items-center gap-2">
+          <span className="font-bold text-brand-on-surface">User #{post.user_id}</span>
+          <span className="text-xs text-brand-on-surface/45">• {formatDate(post.created_at)}</span>
         </div>
 
-        <button
-          type="button"
-          className="rounded-full p-2 text-brand-on-surface/45 transition hover:bg-brand-neutral-soft hover:text-brand-on-surface"
-        >
-          <MoreHorizontal className="h-5 w-5" />
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-full bg-brand-neutral-soft px-3 py-1 text-xs font-bold text-brand-on-surface/65">
+            {formatPageName(post.page_name)}
+          </span>
+
+          <ContentTypeBadge type={post.content_type} />
+          <CategoryBadge category={post.category} />
+        </div>
       </div>
 
       <Link to={buildPostDetailRoute(post.id)} className="block">

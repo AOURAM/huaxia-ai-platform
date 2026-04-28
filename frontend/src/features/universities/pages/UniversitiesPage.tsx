@@ -1,4 +1,13 @@
-import { Bell, GraduationCap, LogOut, Search, UserCircle } from 'lucide-react';
+import {
+  BookOpen,
+  Building2,
+  FileText,
+  GraduationCap,
+  LogOut,
+  Search,
+  Sparkles,
+  WalletCards,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -9,7 +18,55 @@ import { CreatePostCard } from '@/features/feed/components/CreatePostCard';
 import { TopPostsPanel } from '@/features/feed/components/TopPostsPanel';
 import { useAllPosts } from '@/features/feed/hooks/useAllPosts';
 import { PostList } from '@/shared/components/post/PostList';
-import type { Post } from '@/types/post';
+import type { ContentType, Post } from '@/types/post';
+
+type DiscussionFilter = 'all' | Extract<ContentType, 'question' | 'guide' | 'experience' | 'tip'>;
+
+const discussionTabs: Array<{
+  label: string;
+  value: DiscussionFilter;
+}> = [
+  { label: 'All', value: 'all' },
+  { label: 'Questions', value: 'question' },
+  { label: 'Guides', value: 'guide' },
+  { label: 'Experiences', value: 'experience' },
+  { label: 'Tips', value: 'tip' },
+];
+
+const universitySearchTopics = [
+  {
+    title: 'Admissions',
+    description: 'Search application documents, deadlines, interviews, and registration steps.',
+    icon: FileText,
+    query: 'university admission application documents deadline registration',
+  },
+  {
+    title: 'Scholarships',
+    description: 'Search CSC, university scholarships, stipends, renewal rules, and eligibility.',
+    icon: WalletCards,
+    query: 'scholarship CSC stipend renewal requirements eligibility',
+  },
+  {
+    title: 'Campus Life',
+    description: 'Search dorms, canteens, libraries, clubs, offices, and daily campus problems.',
+    icon: Building2,
+    query: 'campus life dorm canteen library student office',
+  },
+  {
+    title: 'Courses & Exams',
+    description: 'Search class registration, attendance, credits, exams, supervisors, and graduation.',
+    icon: BookOpen,
+    query: 'courses exams credits attendance supervisor graduation',
+  },
+];
+
+function getTabCount(posts: Post[], filter: DiscussionFilter) {
+  if (filter === 'all') {
+    return posts.length;
+  }
+
+  return posts.filter((post) => post.content_type === filter).length;
+}
 
 export function UniversitiesPage() {
   const { logout } = useAuth();
@@ -19,39 +76,57 @@ export function UniversitiesPage() {
   const [searchResults, setSearchResults] = useState<Post[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<DiscussionFilter>('all');
 
   const universityPosts = useMemo(
     () => allPosts.filter((post) => post.page_name === 'universities'),
     [allPosts],
   );
 
-  const visiblePosts = searchResults ?? universityPosts;
+  const sourcePosts = searchResults ?? universityPosts;
 
-  const handleSearch = async () => {
-    const trimmedQuery = query.trim();
+  const visiblePosts = useMemo(() => {
+    if (activeTab === 'all') {
+      return sourcePosts;
+    }
 
-    if (!trimmedQuery) {
+    return sourcePosts.filter((post) => post.content_type === activeTab);
+  }, [activeTab, sourcePosts]);
+
+  const handleSearch = async (overrideQuery?: string) => {
+    const searchQuery = (overrideQuery ?? query).trim();
+
+    if (!searchQuery) {
       setSearchResults(null);
       setSearchError(null);
       return;
     }
 
+    setQuery(searchQuery);
     setIsSearching(true);
     setSearchError(null);
 
     try {
       const response = await searchPosts({
-        query: trimmedQuery,
+        query: searchQuery,
         page_name: 'universities',
         limit: 20,
       });
 
       setSearchResults(response.results);
+      setActiveTab('all');
     } catch {
       setSearchError('Search failed. Check that your backend is running.');
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const clearSearch = () => {
+    setQuery('');
+    setSearchResults(null);
+    setSearchError(null);
+    setActiveTab('all');
   };
 
   return (
@@ -84,56 +159,34 @@ export function UniversitiesPage() {
               Universities
             </Link>
 
-            <button
-              type="button"
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60"
+            <Link
+              to={ROUTES.culture}
+              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
             >
               Culture
-            </button>
+            </Link>
 
-            <button
-              type="button"
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60"
+            <Link
+              to={ROUTES.dailyLife}
+              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
             >
               Daily Life
-            </button>
+            </Link>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="rounded-full p-2 text-brand-primary transition hover:bg-brand-neutral-soft"
-            >
-              <Search className="h-5 w-5" />
-            </button>
-
-            <button
-              type="button"
-              className="rounded-full p-2 text-brand-primary transition hover:bg-brand-neutral-soft"
-            >
-              <Bell className="h-5 w-5" />
-            </button>
-
-            <button
-              type="button"
-              className="rounded-full p-2 text-brand-primary transition hover:bg-brand-neutral-soft"
-            >
-              <UserCircle className="h-6 w-6" />
-            </button>
-
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-full p-2 text-brand-on-surface/55 transition hover:bg-brand-neutral-soft hover:text-brand-danger"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={logout}
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-brand-on-surface/60 transition hover:bg-brand-neutral-soft hover:text-brand-danger"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
         </div>
       </nav>
 
-      <div className="mx-auto flex w-full max-w-[1280px] items-start gap-8 px-4 py-8 md:px-6">
-        <main className="min-w-0 flex-1 space-y-8">
+      <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 gap-8 px-4 py-8 md:px-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <main className="min-w-0 space-y-8">
           <section className="space-y-6">
             <div>
               <p className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.2em] text-brand-primary">
@@ -141,17 +194,17 @@ export function UniversitiesPage() {
                 Universities
               </p>
 
-              <h1 className="font-serif text-4xl font-bold text-brand-on-surface">
+              <h1 className="font-serif text-4xl font-bold text-brand-on-surface md:text-5xl">
                 University life in China
               </h1>
 
-              <p className="mt-2 max-w-2xl text-brand-on-surface/65">
-                Ask questions, share admission experiences, compare campuses, and help other
-                international students understand Chinese universities.
+              <p className="mt-3 max-w-3xl text-base leading-7 text-brand-on-surface/65">
+                Find real student posts about admissions, scholarships, campus life, courses, dorms,
+                and university problems in China.
               </p>
             </div>
 
-            <div className="rounded-xl border border-brand-outline bg-white p-4 shadow-sm">
+            <section className="rounded-xl border border-brand-outline bg-white p-4 shadow-sm">
               <div className="flex items-center gap-3 rounded-full bg-brand-neutral-soft px-5 py-4">
                 <Search className="h-5 w-5 text-brand-on-surface/35" />
 
@@ -163,13 +216,13 @@ export function UniversitiesPage() {
                       handleSearch();
                     }
                   }}
-                  placeholder="Search university posts, admission tips, campus life..."
+                  placeholder="Search university posts, scholarship rules, dorm life, admission deadlines..."
                   className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-brand-on-surface/40"
                 />
 
                 <button
                   type="button"
-                  onClick={handleSearch}
+                  onClick={() => handleSearch()}
                   disabled={isSearching}
                   className="text-sm font-bold text-brand-primary disabled:opacity-60"
                 >
@@ -184,23 +237,53 @@ export function UniversitiesPage() {
               ) : null}
 
               {searchResults ? (
-                <div className="mt-4 flex items-center justify-between text-sm text-brand-on-surface/60">
-                  <span>Showing university search results for “{query}”.</span>
+                <div className="mt-4 flex items-center justify-between gap-4 text-sm text-brand-on-surface/60">
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-brand-primary" />
+                    Showing university search results for “{query}”.
+                  </span>
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setQuery('');
-                      setSearchResults(null);
-                      setSearchError(null);
-                    }}
+                    onClick={clearSearch}
                     className="font-bold text-brand-primary"
                   >
                     Clear
                   </button>
                 </div>
               ) : null}
-            </div>
+            </section>
+
+            <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {universitySearchTopics.map((topic) => {
+                const Icon = topic.icon;
+
+                return (
+                  <button
+                    key={topic.title}
+                    type="button"
+                    onClick={() => handleSearch(topic.query)}
+                    className="rounded-xl border border-brand-outline bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand-primary hover:shadow-md"
+                  >
+                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-neutral-soft text-brand-primary">
+                      <Icon className="h-5 w-5" />
+                    </div>
+
+                    <h2 className="font-serif text-xl font-bold text-brand-on-surface">
+                      {topic.title}
+                    </h2>
+
+                    <p className="mt-2 text-sm leading-relaxed text-brand-on-surface/60">
+                      {topic.description}
+                    </p>
+
+                    <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-brand-primary">
+                      Search this topic
+                    </p>
+                  </button>
+                );
+              })}
+            </section>
 
             <CreatePostCard pageName="universities" />
           </section>
@@ -209,35 +292,65 @@ export function UniversitiesPage() {
             <div className="mb-5">
               <h2 className="font-serif text-3xl font-bold">University discussions</h2>
               <p className="text-sm text-brand-on-surface/60">
-                Real Huaxia posts about admission, campus life, study, and university experience.
+                Real Huaxia posts from the backend, filtered by discussion type.
               </p>
             </div>
 
+            <div className="sticky top-16 z-40 flex overflow-x-auto border-b border-brand-outline bg-brand-surface pt-2">
+              {discussionTabs.map((tab) => {
+                const isActive = activeTab === tab.value;
+
+                return (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={() => setActiveTab(tab.value)}
+                    className={`relative whitespace-nowrap px-6 py-4 text-sm font-bold tracking-wide transition ${
+                      isActive
+                        ? 'text-brand-primary'
+                        : 'text-brand-on-surface/55 hover:text-brand-on-surface'
+                    }`}
+                  >
+                    {tab.label} ({getTabCount(sourcePosts, tab.value)})
+
+                    {isActive ? (
+                      <span className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-brand-primary" />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+
             {isLoading ? (
-              <div className="rounded-xl border border-brand-outline bg-white p-10 text-center text-brand-on-surface/60">
+              <div className="mt-6 rounded-xl border border-brand-outline bg-white p-10 text-center text-brand-on-surface/60">
                 Loading university posts...
               </div>
             ) : null}
 
             {isError ? (
-              <div className="rounded-xl border border-brand-danger/20 bg-brand-danger/10 p-10 text-center text-brand-danger">
+              <div className="mt-6 rounded-xl border border-brand-danger/20 bg-brand-danger/10 p-10 text-center text-brand-danger">
                 Could not load posts. Check the backend server.
               </div>
             ) : null}
 
             {!isLoading && !isError && visiblePosts.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-brand-outline bg-white p-10 text-center">
+              <div className="mt-6 rounded-xl border border-dashed border-brand-outline bg-white p-10 text-center">
                 <h3 className="mb-2 font-serif text-2xl font-bold">
-                  No university posts yet
+                  {searchResults ? 'No matching university posts' : 'No university posts yet'}
                 </h3>
+
                 <p className="text-brand-on-surface/60">
-                  Create the first university discussion above.
+                  {searchResults
+                    ? 'Clear the search, choose another tab, or try a different university question.'
+                    : 'Create the first university discussion above.'}
                 </p>
               </div>
             ) : null}
 
             {!isLoading && !isError && visiblePosts.length > 0 ? (
-              <PostList posts={visiblePosts} />
+              <div className="mt-6">
+                <PostList posts={visiblePosts} />
+              </div>
             ) : null}
           </section>
         </main>

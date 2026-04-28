@@ -77,12 +77,12 @@ export function CitiesPage() {
             Culture
             </Link>
 
-            <button
-              type="button"
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60"
-            >
-              Daily Life
-            </button>
+<Link
+  to={ROUTES.dailyLife}
+  className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
+>
+  Daily Life
+</Link>
           </div>
 
           <div className="flex items-center gap-2">
