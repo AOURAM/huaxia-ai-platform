@@ -12,6 +12,7 @@ import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
 import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { UniversitiesPage } from '@/features/universities/pages/UniversitiesPage';
+import { CulturePage } from '@/features/culture/pages/CulturePage';
 
 export function AppRouter() {
   return (
@@ -78,7 +79,16 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path={ROUTES.culture}
+          element={
+          <ProtectedRoute>
+          <AppLayout>
+        <CulturePage />
+      </AppLayout>
+    </ProtectedRoute>
+  }
+/>
         <Route
           path={ROUTES.postDetail}
           element={

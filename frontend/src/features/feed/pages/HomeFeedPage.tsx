@@ -70,19 +70,19 @@ export function HomeFeedPage() {
               Cities
             </Link>
 
-            <button
-              type="button"
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60"
-            >
-              Universities
-            </button>
+            <Link
+            to={ROUTES.universities}
+            className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
+          >
+          Universities
+          </Link>
 
-            <button
-              type="button"
-              className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60"
-            >
-              Culture
-            </button>
+          <Link
+          to={ROUTES.culture}
+          className="flex h-16 items-center border-b-2 border-transparent text-sm font-bold text-brand-on-surface/60 transition hover:text-brand-primary"
+          >
+          Culture
+          </Link>
 
             <button
               type="button"
