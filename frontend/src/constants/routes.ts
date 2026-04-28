@@ -7,6 +7,7 @@ export const ROUTES = {
   universities: '/universities',
   culture: '/culture',
   dailyLife: '/daily-life',
+  profile: '/profile',
   postDetail: '/posts/:postId',
 } as const;
 

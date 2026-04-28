@@ -1,4 +1,4 @@
-import { LogOut } from 'lucide-react';
+import { LogOut, UserCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { ROUTES } from '@/constants/routes';
@@ -66,15 +66,30 @@ export function Header() {
           })}
         </div>
 
-        <button
-          type="button"
-          onClick={logout}
-          className="inline-flex items-center gap-2 rounded-full p-2 text-brand-on-surface/55 transition hover:bg-brand-neutral-soft hover:text-brand-danger"
-          title="Sign out"
-          aria-label="Sign out"
-        >
-          <LogOut className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            to={ROUTES.profile}
+            className={`rounded-full p-2 transition hover:bg-brand-neutral-soft ${
+              isActivePath(location.pathname, ROUTES.profile)
+                ? 'text-brand-primary'
+                : 'text-brand-on-surface/55 hover:text-brand-primary'
+            }`}
+            title="Profile"
+            aria-label="Profile"
+          >
+            <UserCircle className="h-6 w-6" />
+          </Link>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="rounded-full p-2 text-brand-on-surface/55 transition hover:bg-brand-neutral-soft hover:text-brand-danger"
+            title="Sign out"
+            aria-label="Sign out"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     </nav>
   );

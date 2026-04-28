@@ -14,6 +14,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
 import { UniversitiesPage } from '@/features/universities/pages/UniversitiesPage';
 import { CulturePage } from '@/features/culture/pages/CulturePage';
 import { DailyLifePage } from '@/features/daily-life/pages/DailyLifePage';
+import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 
 export function AppRouter() {
   return (
@@ -96,6 +97,16 @@ export function AppRouter() {
         <ProtectedRoute>
         <AppLayout>
         <DailyLifePage />
+      </AppLayout>
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path={ROUTES.profile}
+  element={
+    <ProtectedRoute>
+      <AppLayout>
+        <ProfilePage />
       </AppLayout>
     </ProtectedRoute>
   }
