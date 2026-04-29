@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from
 import { Check, Eye, EyeOff, Loader2, Sparkles, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import signInBg from '@/assets/signin-bg.jpg';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ApiError } from '@/lib/http';
@@ -61,7 +62,10 @@ export function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen w-full overflow-hidden bg-brand-surface" onMouseMove={handleMouseMove}>
+    <div
+      className="flex min-h-screen w-full overflow-hidden bg-brand-surface"
+      onMouseMove={handleMouseMove}
+    >
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -77,7 +81,9 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2 text-center lg:text-left">
-            <h1 className="font-serif text-4xl tracking-tight text-brand-on-surface lg:text-5xl">Welcome</h1>
+            <h1 className="font-serif text-4xl tracking-tight text-brand-on-surface lg:text-5xl">
+              Welcome
+            </h1>
             <p className="text-lg text-brand-on-surface/60">
               Access your account and continue your journey with us
             </p>
@@ -147,26 +153,46 @@ export function LoginForm() {
             >
               <AnimatePresence mode="wait">
                 {status === 'idle' && (
-                  <motion.span key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <motion.span
+                    key="idle"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
                     Sign In
                   </motion.span>
                 )}
 
                 {status === 'loading' && (
-                  <motion.div key="loading" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                  <motion.div
+                    key="loading"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                  >
                     <Loader2 className="animate-spin" />
                   </motion.div>
                 )}
 
                 {status === 'success' && (
-                  <motion.div key="success" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2">
+                  <motion.div
+                    key="success"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex items-center gap-2"
+                  >
                     <Check size={24} />
                     <span>Success</span>
                   </motion.div>
                 )}
 
                 {status === 'error' && (
-                  <motion.div key="error" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2">
+                  <motion.div
+                    key="error"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex items-center gap-2"
+                  >
                     <X size={24} />
                     <span>Error</span>
                   </motion.div>
@@ -176,7 +202,9 @@ export function LoginForm() {
 
             <div className="relative flex items-center gap-4 py-2">
               <div className="h-px flex-1 bg-brand-outline/50" />
-              <span className="text-sm font-medium lowercase text-brand-on-surface/40">or continue with</span>
+              <span className="text-sm font-medium lowercase text-brand-on-surface/40">
+                or continue with
+              </span>
               <div className="h-px flex-1 bg-brand-outline/50" />
             </div>
 
@@ -207,12 +235,15 @@ export function LoginForm() {
         className="hidden h-screen p-6 lg:block lg:w-1/2"
       >
         <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] shadow-2xl">
-          <motion.div
-            style={{ x: backgroundX, y: backgroundY, scale: 1.05 }}
-            className="absolute inset-0 bg-gradient-to-br from-brand-neutral-soft via-white to-brand-outline/30"
+          <motion.img
+            src={signInBg}
+            alt="Chinese garden scenery"
+            style={{ x: backgroundX, y: backgroundY, scale: 1.08 }}
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-on-surface/30 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-on-surface/20 via-brand-on-surface/10 to-brand-primary/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-on-surface/45 via-transparent to-transparent" />
 
           <motion.div
             style={{ x: cardX, y: cardY }}
@@ -232,8 +263,9 @@ export function LoginForm() {
               </div>
             </div>
 
-            <p className="font-serif text-sm leading-relaxed text-white/90 italic">
-              "Amazing platform! The user experience is seamless and the features are exactly what I needed for my cultural research projects."
+            <p className="font-serif text-sm italic leading-relaxed text-white/90">
+              "Amazing platform! The user experience is seamless and the features are exactly what I
+              needed for my cultural research projects."
             </p>
           </motion.div>
         </div>

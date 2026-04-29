@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from '@/app/guards/ProtectedRoute';
 import { AppLayout } from '@/app/layouts/AppLayout';
@@ -10,6 +10,7 @@ import { CitiesPage } from '@/features/cities/pages/CitiesPage';
 import { CulturePage } from '@/features/culture/pages/CulturePage';
 import { DailyLifePage } from '@/features/daily-life/pages/DailyLifePage';
 import { HomeFeedPage } from '@/features/feed/pages/HomeFeedPage';
+import { LandingPage } from '@/features/landing/pages/LandingPage';
 import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
 import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
@@ -21,7 +22,14 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to={ROUTES.login} replace />} />
+        <Route
+          path={ROUTES.landing}
+          element={
+            <PublicLayout>
+              <LandingPage />
+            </PublicLayout>
+          }
+        />
 
         <Route
           path={ROUTES.login}
