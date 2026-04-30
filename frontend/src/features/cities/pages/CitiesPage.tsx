@@ -1,9 +1,11 @@
 import { useState } from 'react';
+
 import { MapPin, Search } from 'lucide-react';
 
 import { CityMap } from '@/features/cities/components/CityMap';
 import { useCities, useCityPosts } from '@/features/cities/hooks/useCities';
 import { CreatePostCard } from '@/features/feed/components/CreatePostCard';
+
 import { PostList } from '@/shared/components/post/PostList';
 
 const regionFilters = [
@@ -48,8 +50,8 @@ export function CitiesPage() {
           </h1>
 
           <p className="mt-3 max-w-2xl text-brand-on-surface/65">
-            Browse city-focused posts, compare locations, and discover practical student experiences
-            shared by the Huaxia community.
+            Browse city-focused posts, compare locations, and discover practical student
+            experiences shared by the Huaxia community.
           </p>
         </section>
 
@@ -119,43 +121,55 @@ export function CitiesPage() {
 
         {!citiesLoading && !citiesError && selectedCity ? (
           <>
-            <section className="grid grid-cols-1 gap-8 lg:grid-cols-[1.6fr_0.9fr]">
-              <div className="overflow-hidden rounded-2xl border border-brand-outline bg-white shadow-sm">
-                <div className="border-b border-brand-outline px-6 py-4">
-                  <h2 className="font-serif text-2xl font-bold">Interactive Cultural Map</h2>
+            <section className="mb-8 overflow-hidden rounded-2xl border border-brand-outline bg-white shadow-sm">
+              <div className="border-b border-brand-outline px-6 py-4">
+                <h2 className="font-serif text-2xl font-bold">Interactive Cultural Map</h2>
 
-                  <p className="mt-1 text-sm text-brand-on-surface/60">
-                    Select a city marker to view its details and related discussions.
-                  </p>
-                </div>
-
-                <div className="overflow-hidden bg-[#eef2f3]">
-                  <CityMap
-                    cities={cities}
-                    selectedCity={selectedCity}
-                    onSelectCity={setSelectedCitySlug}
-                  />
-                </div>
+                <p className="mt-1 text-sm text-brand-on-surface/60">
+                  Select a city marker to view its details and related discussions.
+                </p>
               </div>
 
-              <aside className="overflow-hidden rounded-2xl border border-brand-outline bg-white shadow-sm">
-                <div className="relative h-48 overflow-hidden bg-brand-neutral-soft">
+              <div className="overflow-hidden bg-[#eef2f3]">
+                <CityMap
+                  cities={cities}
+                  selectedCity={selectedCity}
+                  onSelectCity={setSelectedCitySlug}
+                />
+              </div>
+            </section>
+
+            <section className="overflow-hidden rounded-2xl border border-brand-outline bg-white shadow-sm">
+              <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.4fr]">
+                <div className="relative min-h-[260px] overflow-hidden bg-brand-neutral-soft lg:min-h-full">
                   {selectedCity.image_url ? (
                     <img
                       src={selectedCity.image_url}
                       alt={selectedCity.name}
-                      className="h-full w-full object-cover"
+                      className="h-full min-h-[260px] w-full object-cover lg:absolute lg:inset-0"
                     />
-                  ) : null}
+                  ) : (
+                    <div className="flex h-full min-h-[260px] items-center justify-center bg-brand-neutral-soft px-8 text-center">
+                      <p className="font-serif text-4xl font-bold text-brand-on-surface/20">
+                        {selectedCity.name}
+                      </p>
+                    </div>
+                  )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
-                  <h2 className="absolute bottom-5 left-6 font-serif text-4xl font-bold text-white">
-                    {selectedCity.name}
-                  </h2>
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-white/75">
+                      Selected city
+                    </p>
+
+                    <h2 className="font-serif text-4xl font-bold text-white md:text-5xl">
+                      {selectedCity.name}
+                    </h2>
+                  </div>
                 </div>
 
-                <div className="space-y-5 p-6">
+                <div className="space-y-5 p-6 md:p-8">
                   <div className="flex flex-wrap gap-2">
                     {selectedCity.tags.map((tag) => (
                       <span
@@ -183,36 +197,38 @@ export function CitiesPage() {
                     </div>
                   ) : null}
 
-                  <div className="rounded-xl border border-brand-outline bg-brand-neutral-soft p-4">
-                    <div className="mb-2 flex items-center gap-2 text-sm font-bold text-brand-primary">
-                      <MapPin className="h-4 w-4" />
-                      Province / Region
+                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                    <div className="rounded-xl border border-brand-outline bg-brand-neutral-soft p-4">
+                      <div className="mb-2 flex items-center gap-2 text-sm font-bold text-brand-primary">
+                        <MapPin className="h-4 w-4" />
+                        Province / Region
+                      </div>
+
+                      <p className="text-sm text-brand-on-surface/70">
+                        {selectedCity.province} · {selectedCity.region.toUpperCase()}
+                      </p>
+
+                      {selectedCity.cost_level ? (
+                        <p className="mt-2 text-sm text-brand-on-surface/70">
+                          Cost level: <strong>{selectedCity.cost_level}</strong>
+                        </p>
+                      ) : null}
                     </div>
 
-                    <p className="text-sm text-brand-on-surface/70">
-                      {selectedCity.province} · {selectedCity.region.toUpperCase()}
-                    </p>
+                    {selectedCity.popular_universities.length > 0 ? (
+                      <div className="rounded-xl border border-brand-outline bg-white p-4">
+                        <h3 className="mb-3 text-sm font-bold text-brand-on-surface">
+                          Popular universities
+                        </h3>
 
-                    {selectedCity.cost_level ? (
-                      <p className="mt-2 text-sm text-brand-on-surface/70">
-                        Cost level: <strong>{selectedCity.cost_level}</strong>
-                      </p>
+                        <ul className="space-y-2 text-sm text-brand-on-surface/65">
+                          {selectedCity.popular_universities.map((university) => (
+                            <li key={university}>• {university}</li>
+                          ))}
+                        </ul>
+                      </div>
                     ) : null}
                   </div>
-
-                  {selectedCity.popular_universities.length > 0 ? (
-                    <div className="rounded-xl border border-brand-outline bg-white p-4">
-                      <h3 className="mb-3 text-sm font-bold text-brand-on-surface">
-                        Popular universities
-                      </h3>
-
-                      <ul className="space-y-2 text-sm text-brand-on-surface/65">
-                        {selectedCity.popular_universities.map((university) => (
-                          <li key={university}>• {university}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
 
                   {selectedCity.highlights.length > 0 ? (
                     <div className="rounded-xl border border-brand-outline bg-white p-4">
@@ -233,7 +249,7 @@ export function CitiesPage() {
                     </div>
                   ) : null}
                 </div>
-              </aside>
+              </div>
             </section>
 
             <section className="mt-8">

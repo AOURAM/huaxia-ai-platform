@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+
 import maplibregl, { type Map, type Marker } from 'maplibre-gl';
 
 import type { City } from '@/types/city';
@@ -27,9 +28,18 @@ export function CityMap({ cities, selectedCity, onSelectCity }: CityMapProps) {
 
     mapRef.current.addControl(new maplibregl.NavigationControl(), 'top-left');
 
+    const resizeObserver = new ResizeObserver(() => {
+      mapRef.current?.resize();
+    });
+
+    resizeObserver.observe(containerRef.current);
+
     return () => {
+      resizeObserver.disconnect();
+
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
+
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -37,6 +47,7 @@ export function CityMap({ cities, selectedCity, onSelectCity }: CityMapProps) {
 
   useEffect(() => {
     const map = mapRef.current;
+
     if (!map) return;
 
     markersRef.current.forEach((marker) => marker.remove());
@@ -50,7 +61,7 @@ export function CityMap({ cities, selectedCity, onSelectCity }: CityMapProps) {
       markerElement.className =
         city.slug === selectedCity?.slug
           ? 'rounded-full border-[3px] border-white bg-brand-primary px-5 py-2 text-xs font-bold text-white shadow-xl'
-          : 'rounded-full border-[3px] border-white bg-brand-primary/90 px-3 py-2 text-xs font-bold text-white shadow-lg';
+          : 'rounded-full border-[3px] border-white bg-brand-primary/90 px-3 py-2 text-xs font-bold text-white shadow-lg transition hover:bg-brand-primary';
 
       markerElement.onclick = () => onSelectCity(city.slug);
 
@@ -67,6 +78,7 @@ export function CityMap({ cities, selectedCity, onSelectCity }: CityMapProps) {
 
   useEffect(() => {
     const map = mapRef.current;
+
     if (!map || !selectedCity) return;
 
     map.flyTo({
@@ -77,5 +89,5 @@ export function CityMap({ cities, selectedCity, onSelectCity }: CityMapProps) {
     });
   }, [selectedCity]);
 
-  return <div ref={containerRef} className="h-[560px] w-full" />;
+  return <div ref={containerRef} className="h-[420px] w-full md:h-[520px] xl:h-[620px]" />;
 }
