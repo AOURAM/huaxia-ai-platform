@@ -1,27 +1,50 @@
-# Virtual environment
+# Python virtual environments
 venv/
+.venv/
+env/
+ENV/
 pyvenv.cfg
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Environment variables (VERY IMPORTANT)
+# Environment variables
 .env
+.env.*
+!.env.example
 
-# VS Code / IDE
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Uploads generated during local testing
+uploads/
+!uploads/.gitkeep
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Frontend env files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# IDE/editor files
 .vscode/
 .idea/
 
 # OS files
 .DS_Store
 Thumbs.db
-
-# Database files (if any)
-*.db
-*.sqlite3
-
-# Logs
-*.log
