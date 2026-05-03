@@ -1,8 +1,14 @@
-import { CalendarDays, Clock, MapPin } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useCultureEvents } from '@/features/culture/hooks/useCultureEvents';
 import type { CultureEvent } from '@/types/cultureEvent';
+
+function getCurrentMonthDate() {
+  const now = new Date();
+
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
 
 function parseEventDate(dateValue: string) {
   return new Date(`${dateValue}T00:00:00`);
@@ -66,29 +72,22 @@ function groupEventsByDay(events: CultureEvent[], year: number, monthIndex: numb
   return grouped;
 }
 
+function getEventsForMonth(events: CultureEvent[], year: number, monthIndex: number) {
+  return events.filter((event) => {
+    const eventDate = parseEventDate(event.event_date);
+
+    return eventDate.getFullYear() === year && eventDate.getMonth() === monthIndex;
+  });
+}
+
 export function CultureEventsCalendar() {
   const { data: events = [], isLoading, isError } = useCultureEvents();
+
+  const [displayedMonthDate, setDisplayedMonthDate] = useState(getCurrentMonthDate);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (events.length === 0) {
-      setSelectedEventId(null);
-      return;
-    }
-
-    const selectedEventExists = events.some((event) => event.id === selectedEventId);
-
-    if (!selectedEventExists) {
-      setSelectedEventId(events[0].id);
-    }
-  }, [events, selectedEventId]);
-
-  const selectedEvent =
-    events.find((event) => event.id === selectedEventId) ?? events[0] ?? null;
-
-  const displayedDate = selectedEvent ? parseEventDate(selectedEvent.event_date) : new Date();
-  const displayedYear = displayedDate.getFullYear();
-  const displayedMonthIndex = displayedDate.getMonth();
+  const displayedYear = displayedMonthDate.getFullYear();
+  const displayedMonthIndex = displayedMonthDate.getMonth();
 
   const calendarCells = useMemo(
     () => getCalendarDays(displayedYear, displayedMonthIndex),
@@ -100,48 +99,102 @@ export function CultureEventsCalendar() {
     [events, displayedYear, displayedMonthIndex],
   );
 
+  const displayedMonthEvents = useMemo(
+    () => getEventsForMonth(events, displayedYear, displayedMonthIndex),
+    [events, displayedYear, displayedMonthIndex],
+  );
+
+  useEffect(() => {
+    if (displayedMonthEvents.length === 0) {
+      setSelectedEventId(null);
+      return;
+    }
+
+    const selectedEventIsInDisplayedMonth = displayedMonthEvents.some(
+      (event) => event.id === selectedEventId,
+    );
+
+    if (!selectedEventIsInDisplayedMonth) {
+      setSelectedEventId(displayedMonthEvents[0].id);
+    }
+  }, [displayedMonthEvents, selectedEventId]);
+
+  const selectedEvent =
+    displayedMonthEvents.find((event) => event.id === selectedEventId) ??
+    displayedMonthEvents[0] ??
+    null;
+
+  const goToPreviousMonth = () => {
+    setDisplayedMonthDate(
+      (previousDate) => new Date(previousDate.getFullYear(), previousDate.getMonth() - 1, 1),
+    );
+  };
+
+  const goToNextMonth = () => {
+    setDisplayedMonthDate(
+      (previousDate) => new Date(previousDate.getFullYear(), previousDate.getMonth() + 1, 1),
+    );
+  };
+
   return (
     <section className="rounded-2xl border border-brand-outline bg-white p-5 shadow-sm">
       <div className="mb-5 flex items-center gap-2 border-b border-brand-outline/40 pb-4">
         <CalendarDays className="h-5 w-5 text-brand-primary" />
+
         <div>
           <h3 className="font-serif text-xl font-bold text-brand-on-surface">
             Culture event calendar
           </h3>
+
           <p className="text-xs font-semibold text-brand-on-surface/50">
-            Events loaded from the Huaxia backend.
+            Browse events month by month.
           </p>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="rounded-xl border border-brand-outline bg-brand-neutral-soft p-4 text-sm font-semibold text-brand-on-surface/60">
+        <div className="rounded-xl border border-brand-outline bg-brand-neutral-soft p-5 text-center text-sm font-semibold text-brand-on-surface/60">
           Loading culture events...
         </div>
       ) : null}
 
       {isError ? (
-        <div className="rounded-xl border border-brand-danger/20 bg-brand-danger/10 p-4 text-sm font-semibold text-brand-danger">
+        <div className="rounded-xl border border-brand-danger/20 bg-brand-danger/10 p-5 text-center text-sm font-semibold text-brand-danger">
           Could not load culture events. Check the backend server.
         </div>
       ) : null}
 
-      {!isLoading && !isError && events.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-brand-outline bg-brand-neutral-soft p-4 text-sm font-semibold text-brand-on-surface/60">
-          No culture events found in the backend.
-        </div>
-      ) : null}
-
-      {!isLoading && !isError && events.length > 0 ? (
+      {!isLoading && !isError ? (
         <>
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="font-serif text-lg font-bold text-brand-on-surface">
-              {formatMonthTitle(displayedDate)}
-            </h4>
+          <div className="mb-5 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={goToPreviousMonth}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-outline bg-brand-surface text-brand-primary transition hover:border-brand-primary"
+              aria-label="Previous month"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
 
-            <span className="rounded-full bg-brand-neutral-soft px-3 py-1 text-[11px] font-black uppercase text-brand-primary">
-              {events.length} events
-            </span>
+            <div className="text-center">
+              <h4 className="font-serif text-2xl font-bold text-brand-on-surface">
+                {formatMonthTitle(displayedMonthDate)}
+              </h4>
+
+              <p className="text-sm font-semibold text-brand-on-surface/45">
+                {displayedMonthEvents.length}{' '}
+                {displayedMonthEvents.length === 1 ? 'event' : 'events'} this month
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={goToNextMonth}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-outline bg-brand-surface text-brand-primary transition hover:border-brand-primary"
+              aria-label="Next month"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
 
           <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-bold uppercase text-brand-on-surface/45">
@@ -189,6 +242,16 @@ export function CultureEventsCalendar() {
                       }`}
                     />
                   ) : null}
+
+                  {dayEvents.length > 1 ? (
+                    <span
+                      className={`absolute right-1 top-1 text-[9px] font-black ${
+                        active ? 'text-white' : 'text-brand-primary'
+                      }`}
+                    >
+                      {dayEvents.length}
+                    </span>
+                  ) : null}
                 </button>
               );
             })}
@@ -201,6 +264,7 @@ export function CultureEventsCalendar() {
                   <span className="text-[10px] font-black uppercase text-brand-primary">
                     {formatEventMonth(selectedEvent.event_date)}
                   </span>
+
                   <span className="font-serif text-2xl font-bold leading-none text-brand-on-surface">
                     {formatEventDay(selectedEvent.event_date)}
                   </span>
@@ -233,7 +297,17 @@ export function CultureEventsCalendar() {
                 {selectedEvent.description}
               </p>
             </div>
-          ) : null}
+          ) : (
+            <div className="mt-5 rounded-xl border border-dashed border-brand-outline bg-brand-neutral-soft p-5 text-center">
+              <h4 className="font-serif text-lg font-bold text-brand-on-surface">
+                No events this month
+              </h4>
+
+              <p className="mt-1 text-sm text-brand-on-surface/55">
+                Use the arrows to move to another month.
+              </p>
+            </div>
+          )}
         </>
       ) : null}
     </section>

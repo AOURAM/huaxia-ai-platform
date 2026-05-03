@@ -1,6 +1,6 @@
 import { http } from '@/lib/http';
 import type { RegisterPayload, TokenResponse } from '@/types/auth';
-import type { User } from '@/types/user';
+import type { User, UserUpdatePayload } from '@/types/user';
 
 export function loginUser(email: string, password: string) {
   const body = new URLSearchParams();
@@ -34,5 +34,15 @@ export function getCurrentUser(token?: string) {
           Authorization: `Bearer ${token}`,
         }
       : undefined,
+  });
+}
+
+export function updateCurrentUser(payload: UserUpdatePayload) {
+  return http<User>('/users/me', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
   });
 }
