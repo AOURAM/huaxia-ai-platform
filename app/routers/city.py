@@ -38,7 +38,7 @@ def serialize_post_response(post: Post) -> dict:
         "page_name": post.page_name,
         "content_type": post.content_type,
         "city_id": post.city_id,
-        "category": post.category,
+        "category_id": post.category_id,
         "ai_analysis": post.ai_analysis,
         "summary": post.summary,
         "tags": parse_tags(post.tags),

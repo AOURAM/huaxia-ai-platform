@@ -15,7 +15,8 @@ from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-
+from dotenv import load_dotenv
+load_dotenv()
 from app.core.avatar import DEFAULT_AVATAR_STYLE, build_default_avatar_seed
 from app.core.security import hash_password
 from app.database import Base, SessionLocal, engine
@@ -1599,7 +1600,7 @@ def create_or_get_post(db: Session, plan: dict[str, Any], author: User) -> tuple
         content=plan["content"],
         page_name=plan["page_name"],
         content_type=plan["content_type"],
-        category=local_category(plan["page_name"], plan["content_type"]),
+        category_id=local_category(plan["page_name"], plan["content_type"]),
         ai_analysis=local_ai_analysis(plan["page_name"], plan["title"]),
         summary=make_summary(plan["content"]),
         tags=json.dumps(tags),

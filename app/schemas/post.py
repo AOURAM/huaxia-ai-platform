@@ -31,7 +31,7 @@ class PostCreate(BaseModel):
     content: str
     page_name: str
     content_type: str
-    category: str | None = None
+    category_id: str | None = None
     city_id: int | None = None
 
     @field_validator("page_name")
@@ -73,7 +73,7 @@ class PostResponse(BaseModel):
     content: str
     page_name: str
     content_type: str
-    category: str | None = None
+    category_id: str | None = None
     ai_analysis: str | None = None
     summary: str | None = None
     tags: list[str] | None = None
@@ -154,7 +154,7 @@ class RecommendationResponse(BaseModel):
     title: str
     page_name: str
     content_type: str
-    category: str | None = None
+    category_id: str | None = None
     summary: str | None = None
     image_url: str | None = None
     similarity: float

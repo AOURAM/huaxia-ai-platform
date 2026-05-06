@@ -90,7 +90,7 @@ def serialize_post_response(post: Post) -> dict:
         "content": post.content,
         "page_name": post.page_name,
         "content_type": post.content_type,
-        "category": post.category,
+        "category_id": post.category_id,
         "ai_analysis": post.ai_analysis,
         "summary": post.summary,
         "tags": parse_tags(post.tags),
@@ -412,7 +412,7 @@ def get_top_posts(
                 "page_name": post.page_name,
                 "content_type": post.content_type,
                 "city_id": post.city_id,
-                "category": post.category,
+                "category_id": post.category_id,
                 "summary": post.summary,
                 "image_url": post.image_url,
                 "likes_count": post.likes_count,
@@ -512,7 +512,7 @@ def get_post_detail(
                     "page_name": candidate_post.page_name,
                     "content_type": candidate_post.content_type,
                     "city_id": candidate_post.city_id,
-                    "category": candidate_post.category,
+                    "category_id": candidate_post.category_id,
                     "summary": candidate_post.summary,
                     "image_url": candidate_post.image_url,
                     "similarity": similarity,
@@ -602,7 +602,7 @@ def update_post(
         ai_result = analyze_post(post.content)
         embedding = generate_embedding(post.content)
 
-        post.category = ai_result["category"]
+        post.category_id = ai_result["category"]
         post.ai_analysis = ai_result["analysis"]
         post.summary = ai_result["summary"]
         post.tags = json.dumps(ai_result["tags"])
@@ -753,7 +753,7 @@ def get_post_recommendations(
                 "page_name": post.page_name,
                 "content_type": post.content_type,
                 "city_id": post.city_id,
-                "category": post.category,
+                "category_id": post.category_id,
                 "summary": post.summary,
                 "image_url": post.image_url,
                 "similarity": similarity,

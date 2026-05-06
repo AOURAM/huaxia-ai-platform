@@ -13,7 +13,7 @@ class Post(Base):
     page_name = Column(String(50), nullable=False, index=True)
     content_type = Column(String(50), nullable=False, index=True)
 
-    category = Column(String(100), nullable=True)
+    category_id = Column(String(100), nullable=True, index=True)
     ai_analysis = Column(Text, nullable=True)
     summary = Column(Text, nullable=True)
     tags = Column(Text, nullable=True)
