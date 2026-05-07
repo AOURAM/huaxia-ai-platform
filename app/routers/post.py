@@ -3,6 +3,7 @@ import math
 import os
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy import text
@@ -27,6 +28,22 @@ from app.services.post_enrichment_service import enrich_post_ai
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
+MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+
+ALLOWED_IMAGE_CONTENT_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+}
+
+ALLOWED_IMAGE_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".gif",
+}
 
 def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
     dot_product = sum(a * b for a, b in zip(vec1, vec2))
@@ -71,18 +88,75 @@ def parse_embedding(embedding_value) -> list[float] | None:
 
     return None
 
+def detect_image_extension(file_bytes: bytes) -> str | None:
+    if file_bytes.startswith(b"\xff\xd8\xff"):
+        return ".jpg"
+
+    if file_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+        return ".png"
+
+    if file_bytes.startswith(b"RIFF") and file_bytes[8:12] == b"WEBP":
+        return ".webp"
+
+    if file_bytes.startswith(b"GIF87a") or file_bytes.startswith(b"GIF89a"):
+        return ".gif"
+
+    return None
 
 def save_uploaded_image(image: UploadFile | None) -> str | None:
     if image is None:
         return None
 
+    original_filename = image.filename or ""
+    extension = Path(original_filename).suffix.lower()
+
+    if extension not in ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid image file extension. Allowed: jpg, jpeg, png, webp, gif.",
+        )
+
+    if image.content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid image content type. Allowed: jpeg, png, webp, gif.",
+        )
+
+    file_bytes = image.file.read()
+
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded image is empty.")
+
+    if len(file_bytes) > MAX_IMAGE_SIZE_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail="Image is too large. Maximum allowed size is 5MB.",
+        )
+
+    detected_extension = detect_image_extension(file_bytes)
+
+    if detected_extension is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file is not a valid image.",
+        )
+
+    if extension == ".jpeg":
+        extension = ".jpg"
+
+    if detected_extension != extension:
+        raise HTTPException(
+            status_code=400,
+            detail="Image file extension does not match its content.",
+        )
+
     os.makedirs("uploads/posts", exist_ok=True)
 
-    filename = f"{uuid.uuid4()}_{image.filename}"
+    filename = f"{uuid.uuid4()}{extension}"
     file_path = os.path.join("uploads", "posts", filename)
 
     with open(file_path, "wb") as f:
-        f.write(image.file.read())
+        f.write(file_bytes)
 
     return f"/uploads/posts/{filename}"
 
