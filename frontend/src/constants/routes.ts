@@ -11,8 +11,13 @@ export const ROUTES = {
   profile: '/profile',
   settings: '/settings',
   postDetail: '/posts/:postId',
+  postEdit: '/posts/:postId/edit',
 } as const;
 
 export function buildPostDetailRoute(postId: number) {
   return `/posts/${postId}`;
+}
+
+export function buildPostEditRoute(postId: number) {
+  return `/posts/${postId}/edit`;
 }

@@ -10,7 +10,7 @@ export interface Post {
   content: string;
   page_name: PageName;
   content_type: ContentType;
-  category: string | null;
+  category_id: string | null;
   ai_analysis: string | null;
   summary: string | null;
   tags: string[] | null;
@@ -19,6 +19,7 @@ export interface Post {
   dislikes_count: number;
   created_at: string;
   user_id: number;
+  city_id: number | null;
 }
 
 export interface SearchPost extends Post {
@@ -36,7 +37,8 @@ export interface TopPost {
   title: string;
   page_name: PageName;
   content_type: ContentType;
-  category: string | null;
+  city_id: number | null;
+  category_id: string | null;
   summary: string | null;
   image_url: string | null;
   likes_count: number;
@@ -53,7 +55,8 @@ export interface RecommendationPost {
   title: string;
   page_name: PageName;
   content_type: ContentType;
-  category: string | null;
+  city_id: number | null;
+  category_id: string | null;
   summary: string | null;
   image_url: string | null;
   similarity: number;

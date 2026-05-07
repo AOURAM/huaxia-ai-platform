@@ -12,6 +12,7 @@ import { DailyLifePage } from '@/features/daily-life/pages/DailyLifePage';
 import { HomeFeedPage } from '@/features/feed/pages/HomeFeedPage';
 import { LandingPage } from '@/features/landing/pages/LandingPage';
 import { OnboardingPage } from '@/features/onboarding/pages/OnboardingPage';
+import { EditPostPage } from '@/features/posts/pages/EditPostPage';
 import { PostDetailPage } from '@/features/posts/pages/PostDetailPage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import { SettingsPage } from '@/features/settings/pages/SettingsPage';
@@ -141,6 +142,17 @@ export function AppRouter() {
             <ProtectedRoute>
               <AppLayout>
                 <PostDetailPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.postEdit}
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <EditPostPage />
               </AppLayout>
             </ProtectedRoute>
           }

@@ -1,45 +1,69 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { Home, Search, Sparkles } from 'lucide-react';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { searchPosts } from '@/api/posts';
+import { getAllPosts, getPersonalizedFeed, searchPosts } from '@/api/posts';
 import { CreatePostCard } from '@/features/feed/components/CreatePostCard';
 import { TopPostsPanel } from '@/features/feed/components/TopPostsPanel';
-import { useAllPosts } from '@/features/feed/hooks/useAllPosts';
 import { PostList } from '@/shared/components/post/PostList';
+import { queryKeys } from '@/constants/queryKeys';
 import type { Post } from '@/types/post';
 
 const tabs = ['For You', 'Latest', 'AI Categorized'] as const;
 
 type FeedTab = (typeof tabs)[number];
 
-function getVisiblePosts(posts: Post[], activeTab: FeedTab) {
-  if (activeTab === 'Latest') {
-    return [...posts].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
-  }
+function getAiCategorizedPosts(posts: Post[]) {
+  return posts.filter(
+    (post) => post.category_id || post.summary || (post.tags && post.tags.length > 0),
+  );
+}
 
-  if (activeTab === 'AI Categorized') {
-    return posts.filter(
-      (post) => post.category || post.summary || (post.tags && post.tags.length > 0),
-    );
-  }
-
-  return posts;
+function getLatestPosts(posts: Post[]) {
+  return [...posts].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
 }
 
 export function HomeFeedPage() {
-  const { data: posts = [], isLoading, isError } = useAllPosts();
-
   const [activeTab, setActiveTab] = useState<FeedTab>('For You');
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Post[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  const sourcePosts = searchResults ?? posts;
-  const visiblePosts = getVisiblePosts(sourcePosts, activeTab);
+  const personalizedFeedQuery = useQuery({
+    queryKey: queryKeys.personalizedFeed,
+    queryFn: getPersonalizedFeed,
+  });
+
+  const allPostsQuery = useQuery({
+    queryKey: queryKeys.posts,
+    queryFn: getAllPosts,
+  });
+
+  const allPosts = allPostsQuery.data ?? [];
+  const personalizedPosts = personalizedFeedQuery.data ?? [];
+
+  const tabPosts =
+    activeTab === 'For You'
+      ? personalizedPosts
+      : activeTab === 'Latest'
+        ? getLatestPosts(allPosts)
+        : getAiCategorizedPosts(allPosts);
+
+  const visiblePosts = searchResults ?? tabPosts;
+
+  const isLoading =
+    activeTab === 'For You'
+      ? personalizedFeedQuery.isLoading
+      : allPostsQuery.isLoading;
+
+  const isError =
+    activeTab === 'For You'
+      ? personalizedFeedQuery.isError
+      : allPostsQuery.isError;
 
   const handleSearch = async () => {
     const trimmedQuery = query.trim();
@@ -61,7 +85,9 @@ export function HomeFeedPage() {
 
       setSearchResults(response.results);
     } catch {
-      setSearchError('Search failed. The backend search or embedding service may be unavailable.');
+      setSearchError(
+        'Search failed. The backend search or embedding service may be unavailable.',
+      );
     } finally {
       setIsSearching(false);
     }
@@ -73,151 +99,164 @@ export function HomeFeedPage() {
     setSearchError(null);
   };
 
+  const currentTabDescription =
+    activeTab === 'For You'
+      ? 'Posts ranked from your onboarding interests and activity signals.'
+      : activeTab === 'Latest'
+        ? 'Newest discussions from the whole Huaxia community.'
+        : 'Posts that already have AI category, summary, or tag metadata.';
+
   return (
-    <div className="min-h-screen bg-brand-surface">
-      <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 gap-8 px-4 py-8 md:px-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <main className="min-w-0 space-y-8">
-          <section>
-            <p className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.2em] text-brand-primary">
-              <Home className="h-4 w-4" />
-              Home
-            </p>
+    <main className="mx-auto grid max-w-7xl gap-8 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <section className="min-w-0 space-y-8">
+        <motion.section
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-3xl border border-brand-outline bg-white p-6 shadow-sm"
+        >
+          <div className="mb-5 flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] text-brand-primary">
+            <Home className="h-5 w-5" />
+            Home
+          </div>
 
-            <h1 className="font-serif text-4xl font-bold text-brand-on-surface md:text-5xl">
-              Student knowledge feed
-            </h1>
+          <h1 className="font-serif text-4xl font-black text-brand-on-surface">
+            Student knowledge feed
+          </h1>
 
-            <p className="mt-3 max-w-3xl text-base leading-7 text-brand-on-surface/65">
-              Search, ask, and share practical information about studying and living in China.
-            </p>
-          </section>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-on-surface/60">
+            Search, ask, and share practical information about studying and living in China.
+          </p>
 
-          <section className="rounded-xl border border-brand-outline bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-3 rounded-full bg-brand-neutral-soft px-5 py-4">
-              <Search className="h-5 w-5 text-brand-on-surface/35" />
+          <div className="mt-6 flex overflow-hidden rounded-2xl border border-brand-outline bg-brand-neutral-soft">
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  void handleSearch();
+                }
+              }}
+              placeholder="Search posts by meaning, topic, city, university, or daily problem..."
+              className="min-w-0 flex-1 bg-transparent px-5 py-4 text-sm font-semibold text-brand-on-surface outline-none placeholder:text-brand-on-surface/40"
+            />
 
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    handleSearch();
-                  }
-                }}
-                placeholder="Search posts by meaning, topic, city, university, or daily problem..."
-                className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-brand-on-surface/40"
-              />
+            <button
+              type="button"
+              onClick={() => void handleSearch()}
+              disabled={isSearching}
+              className="flex items-center gap-2 bg-brand-primary px-6 py-4 text-xs font-black uppercase tracking-widest text-white transition hover:bg-brand-primary-hover disabled:opacity-60"
+            >
+              <Search className="h-4 w-4" />
+              {isSearching ? 'Searching...' : 'Search'}
+            </button>
+          </div>
 
+          {searchError ? (
+            <div className="mt-4 rounded-xl border border-brand-danger/20 bg-brand-danger/10 p-4 text-sm font-bold text-brand-danger">
+              {searchError}
+            </div>
+          ) : null}
+
+          {searchResults ? (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-primary/20 bg-brand-primary/5 p-4 text-sm font-bold text-brand-primary">
+              <span>Showing search results for “{query}”.</span>
               <button
                 type="button"
-                onClick={handleSearch}
-                disabled={isSearching}
-                className="text-sm font-bold text-brand-primary disabled:opacity-60"
+                onClick={clearSearch}
+                className="rounded-lg border border-brand-primary/20 px-3 py-1 text-xs uppercase tracking-wider transition hover:bg-brand-primary/10"
               >
-                {isSearching ? 'Searching...' : 'Search'}
+                Clear
               </button>
             </div>
+          ) : null}
+        </motion.section>
 
-            {searchError ? (
-              <div className="mt-4 rounded-lg border border-brand-danger/20 bg-brand-danger/10 p-4 text-sm font-semibold text-brand-danger">
-                {searchError}
-              </div>
-            ) : null}
+        <CreatePostCard />
 
-            {searchResults ? (
-              <div className="mt-4 flex items-center justify-between gap-4 text-sm text-brand-on-surface/60">
-                <span className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-brand-primary" />
-                  Showing search results for “{query}”.
-                </span>
+        <section className="overflow-hidden rounded-3xl border border-brand-outline bg-white shadow-sm">
+          <div className="flex overflow-x-auto border-b border-brand-outline bg-brand-surface">
+            {tabs.map((tab) => {
+              const active = activeTab === tab;
 
+              return (
                 <button
+                  key={tab}
                   type="button"
-                  onClick={clearSearch}
-                  className="font-bold text-brand-primary"
+                  onClick={() => {
+                    setActiveTab(tab);
+                    setSearchResults(null);
+                    setSearchError(null);
+                  }}
+                  className={`relative whitespace-nowrap px-8 py-5 text-sm font-black tracking-wide transition ${
+                    active
+                      ? 'text-brand-primary'
+                      : 'text-brand-on-surface/55 hover:text-brand-on-surface'
+                  }`}
                 >
-                  Clear
+                  {tab}
+                  {active ? (
+                    <motion.span
+                      layoutId="feed-tab-indicator"
+                      className="absolute inset-x-4 bottom-0 h-1 rounded-full bg-brand-primary"
+                    />
+                  ) : null}
                 </button>
-              </div>
-            ) : null}
-          </section>
+              );
+            })}
+          </div>
 
-          <CreatePostCard />
-
-          <section>
-            <div className="sticky top-16 z-40 flex overflow-x-auto border-b border-brand-outline bg-brand-surface pt-2">
-              {tabs.map((tab) => {
-                const active = activeTab === tab;
-
-                return (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setActiveTab(tab)}
-                    className={`relative whitespace-nowrap px-6 py-4 text-sm font-bold tracking-wide transition ${
-                      active
-                        ? 'text-brand-primary'
-                        : 'text-brand-on-surface/55 hover:text-brand-on-surface'
-                    }`}
-                  >
-                    {tab}
-
-                    {active ? (
-                      <motion.div
-                        layoutId="homeActiveTab"
-                        className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-brand-primary"
-                      />
-                    ) : null}
-                  </button>
-                );
-              })}
+          <div className="border-b border-brand-outline bg-white px-6 py-4">
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-on-surface/45">
+              <Sparkles className="h-4 w-4 text-brand-primary" />
+              {searchResults ? 'Search results' : activeTab}
             </div>
+            <p className="mt-1 text-sm text-brand-on-surface/55">
+              {searchResults
+                ? 'Search ignores tab filters and returns the most relevant matching posts.'
+                : currentTabDescription}
+            </p>
+          </div>
 
+          <div className="p-6">
             {isLoading ? (
-              <div className="mt-6 rounded-xl border border-brand-outline bg-white p-10 text-center text-brand-on-surface/60">
+              <div className="rounded-2xl border border-dashed border-brand-outline bg-brand-neutral-soft p-8 text-center text-sm font-bold text-brand-on-surface/55">
                 Loading posts...
               </div>
             ) : null}
 
             {isError ? (
-              <div className="mt-6 rounded-xl border border-brand-danger/20 bg-brand-danger/10 p-10 text-center text-brand-danger">
+              <div className="rounded-2xl border border-brand-danger/20 bg-brand-danger/10 p-8 text-center text-sm font-bold text-brand-danger">
                 Could not load posts. Check the backend server.
               </div>
             ) : null}
 
             {!isLoading && !isError && visiblePosts.length === 0 ? (
-              <div className="mt-6 rounded-xl border border-dashed border-brand-outline bg-white p-10 text-center">
-                <h3 className="mb-2 font-serif text-2xl font-bold">
+              <div className="rounded-2xl border border-dashed border-brand-outline bg-brand-neutral-soft p-10 text-center">
+                <h3 className="font-serif text-2xl font-black text-brand-on-surface">
                   {searchResults ? 'No matching posts' : 'No posts yet'}
                 </h3>
-
-                <p className="text-brand-on-surface/60">
+                <p className="mt-2 text-sm text-brand-on-surface/55">
                   {searchResults
                     ? 'Clear the search or try a different natural-language query.'
-                    : 'Create the first discussion above.'}
+                    : activeTab === 'For You'
+                      ? 'Complete onboarding or create posts that match your interests.'
+                      : 'Create the first discussion above.'}
                 </p>
               </div>
             ) : null}
 
             {!isLoading && !isError && visiblePosts.length > 0 ? (
-              <div className="mt-6">
-                <AnimatePresence mode="popLayout">
-                  <motion.div
-                    key={`${searchResults ? 'search' : 'feed'}-${activeTab}`}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                  >
-                    <PostList posts={visiblePosts} />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
+              <AnimatePresence mode="popLayout">
+                <PostList posts={visiblePosts} />
+              </AnimatePresence>
             ) : null}
-          </section>
-        </main>
+          </div>
+        </section>
+      </section>
 
+      <aside className="space-y-8">
         <TopPostsPanel />
-      </div>
-    </div>
+      </aside>
+    </main>
   );
 }

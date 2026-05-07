@@ -2,25 +2,35 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List
-from uuid import UUID
 
 from app.database import get_db
 from app.models.user import User
 from app.models.user_onboarding import UserOnboarding
+from app.models.user_interest import UserInterest
 from app.routers.user import get_current_user
 from app.schemas.onboarding import OnboardingOut, OnboardingUpsert
-from app.services.interest_service import save_user_interests
-
 
 router = APIRouter(prefix="/users/me/onboarding", tags=["onboarding"])
 
 
-# ✅ NEW: payload for category-based interests
 class InterestPayload(BaseModel):
-    category_ids: List[UUID]
+    category_ids: List[str]
 
 
-# ✅ FIXED: clean route
+def sync_user_interests(db: Session, user_id: int, interests: list[str]) -> None:
+    db.query(UserInterest).filter(UserInterest.user_id == user_id).delete()
+
+    for interest in interests:
+        db.add(
+            UserInterest(
+                user_id=user_id,
+                category_id=interest,
+                weight=1.0,
+                source="onboarding",
+            )
+        )
+
+
 @router.post("/interests")
 def set_interests(
     payload: InterestPayload,
@@ -30,12 +40,12 @@ def set_interests(
     if not payload.category_ids:
         raise HTTPException(status_code=400, detail="No interests provided")
 
-    save_user_interests(db, current_user.id, payload.category_ids)
+    sync_user_interests(db, current_user.id, payload.category_ids)
+    db.commit()
 
     return {"status": "ok"}
 
 
-# ✅ GET onboarding
 @router.get("/", response_model=OnboardingOut)
 def get_my_onboarding(
     db: Session = Depends(get_db),
@@ -53,7 +63,6 @@ def get_my_onboarding(
     return onboarding
 
 
-# ✅ UPDATE onboarding
 @router.put("/", response_model=OnboardingOut)
 def upsert_my_onboarding(
     payload: OnboardingUpsert,
@@ -71,10 +80,12 @@ def upsert_my_onboarding(
         .first()
     )
 
+    interests = [] if payload.skipped else payload.interests
+
     if onboarding is None:
         onboarding = UserOnboarding(
             user_id=current_user.id,
-            interests=payload.interests,
+            interests=interests,
             city=payload.city,
             university=payload.university,
             goal=payload.goal,
@@ -83,12 +94,14 @@ def upsert_my_onboarding(
         )
         db.add(onboarding)
     else:
-        onboarding.interests = payload.interests
+        onboarding.interests = interests
         onboarding.city = payload.city
         onboarding.university = payload.university
         onboarding.goal = payload.goal
         onboarding.completed = payload.completed
         onboarding.skipped = payload.skipped
+
+    sync_user_interests(db, current_user.id, interests)
 
     db.commit()
     db.refresh(onboarding)

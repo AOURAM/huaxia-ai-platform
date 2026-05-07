@@ -201,7 +201,7 @@ export function PostDetailPage() {
                     </span>
 
                     <ContentTypeBadge type={post.content_type} />
-                    <CategoryBadge category={post.category} />
+                    <CategoryBadge category={post.category_id} />
                   </div>
 
                   <section className="rounded-2xl border border-brand-outline bg-brand-neutral-soft p-5">
@@ -411,7 +411,7 @@ export function PostDetailPage() {
                   <li className="flex items-center justify-between gap-4">
                     <span className="text-brand-on-surface/55">AI Category</span>
                     <span className="font-bold text-brand-primary">
-                      {post.category || 'Pending'}
+                      {post.category_id || 'Pending'}
                     </span>
                   </li>
                 </ul>

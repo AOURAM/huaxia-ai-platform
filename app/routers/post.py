@@ -41,13 +41,16 @@ def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
 def parse_tags(tags_value):
     if tags_value is None:
         return None
+
     if isinstance(tags_value, list):
         return tags_value
+
     if isinstance(tags_value, str):
         try:
             return json.loads(tags_value)
         except json.JSONDecodeError:
             return []
+
     return []
 
 
@@ -65,7 +68,12 @@ def save_uploaded_image(image: UploadFile | None) -> str | None:
 
     return f"/uploads/posts/{filename}"
 
-def validate_city_for_post(page_name: str, city_id: int | None, db: Session) -> int | None:
+
+def validate_city_for_post(
+    page_name: str,
+    city_id: int | None,
+    db: Session,
+) -> int | None:
     if page_name != "cities":
         return None
 
@@ -145,7 +153,6 @@ def create_post(
         )
 
     validated_city_id = validate_city_for_post(page_name, city_id, db)
-
     image_url = save_uploaded_image(image)
 
     ai_result = analyze_post(content)
@@ -157,7 +164,7 @@ def create_post(
         page_name=page_name,
         content_type=content_type,
         city_id=validated_city_id,
-        category=ai_result["category"],
+        category_id=ai_result["category"],
         ai_analysis=ai_result["analysis"],
         summary=ai_result["summary"],
         tags=json.dumps(ai_result["tags"]),
@@ -183,6 +190,7 @@ def create_post(
         ),
         {"post_id": new_post.id},
     )
+
     db.commit()
     db.refresh(new_post)
 
@@ -206,6 +214,7 @@ def get_current_user_posts(
         .order_by(Post.created_at.desc())
         .all()
     )
+
     return [serialize_post_response(post) for post in posts]
 
 
@@ -224,7 +233,7 @@ def search_posts(
             page_name,
             content_type,
             city_id,
-            category,
+            category_id,
             ai_analysis,
             summary,
             tags,
@@ -249,6 +258,10 @@ def search_posts(
         sql += " AND content_type = :content_type"
         params["content_type"] = request.content_type
 
+    if request.city_id:
+        sql += " AND city_id = :city_id"
+        params["city_id"] = request.city_id
+
     sql += " ORDER BY keyword_score DESC"
 
     keyword_results = db.execute(text(sql), params).mappings().all()
@@ -266,7 +279,6 @@ def search_posts(
             float(post["keyword_score"]) if post["keyword_score"] is not None else 0.0
         )
         keyword_score = min(raw_keyword_score * 20, 1.0)
-
         final_score = (semantic_score * 0.7) + (keyword_score * 0.3)
 
         scored_posts.append(
@@ -277,7 +289,7 @@ def search_posts(
                 "page_name": post["page_name"],
                 "content_type": post["content_type"],
                 "city_id": post["city_id"],
-                "category": post["category"],
+                "category_id": post["category_id"],
                 "ai_analysis": post["ai_analysis"],
                 "summary": post["summary"],
                 "tags": parse_tags(post["tags"]),
@@ -292,7 +304,7 @@ def search_posts(
             }
         )
 
-    scored_posts.sort(key=lambda x: x["final_score"], reverse=True)
+    scored_posts.sort(key=lambda item: item["final_score"], reverse=True)
 
     return {"results": scored_posts[: request.limit]}
 
@@ -312,7 +324,7 @@ def search_posts_globally(
             page_name,
             content_type,
             city_id,
-            category,
+            category_id,
             ai_analysis,
             summary,
             tags,
@@ -347,13 +359,13 @@ def search_posts_globally(
             float(post["keyword_score"]) if post["keyword_score"] is not None else 0.0
         )
         keyword_score = min(raw_keyword_score * 20, 1.0)
-
         final_score = (semantic_score * 0.7) + (keyword_score * 0.3)
 
         if final_score < request.min_score:
             continue
 
         page = post["page_name"]
+
         if page not in grouped_results:
             continue
 
@@ -365,7 +377,7 @@ def search_posts_globally(
                 "page_name": post["page_name"],
                 "content_type": post["content_type"],
                 "city_id": post["city_id"],
-                "category": post["category"],
+                "category_id": post["category_id"],
                 "ai_analysis": post["ai_analysis"],
                 "summary": post["summary"],
                 "tags": parse_tags(post["tags"]),
@@ -381,7 +393,7 @@ def search_posts_globally(
         )
 
     for page in grouped_results:
-        grouped_results[page].sort(key=lambda x: x["final_score"], reverse=True)
+        grouped_results[page].sort(key=lambda item: item["final_score"], reverse=True)
         grouped_results[page] = grouped_results[page][: request.per_page_limit]
 
     return grouped_results
@@ -421,7 +433,7 @@ def get_top_posts(
             }
         )
 
-    ranked_posts.sort(key=lambda x: x["top_score"], reverse=True)
+    ranked_posts.sort(key=lambda item: item["top_score"], reverse=True)
 
     return {"results": ranked_posts[:limit]}
 
@@ -521,7 +533,10 @@ def get_post_detail(
                 }
             )
 
-        recommendations.sort(key=lambda x: x["recommendation_score"], reverse=True)
+        recommendations.sort(
+            key=lambda item: item["recommendation_score"],
+            reverse=True,
+        )
         recommendations = recommendations[:5]
 
     return {
@@ -560,15 +575,18 @@ def update_post(
 
     if page_name is not None:
         page_name = page_name.strip().lower()
+
         if page_name not in allowed_pages:
             raise HTTPException(
                 status_code=400,
                 detail="page_name must be one of: cities, universities, culture, daily_life",
             )
+
         final_page_name = page_name
 
     if content_type is not None:
         content_type = content_type.strip().lower()
+
         if content_type not in allowed_content_types:
             raise HTTPException(
                 status_code=400,
@@ -625,6 +643,7 @@ def update_post(
             ),
             {"post_id": post.id},
         )
+
         db.commit()
         db.refresh(post)
 
@@ -688,6 +707,7 @@ def react_to_post(
             post_id=post_id,
             reaction_type=request.reaction_type,
         )
+
         db.add(new_reaction)
 
         if request.reaction_type == "like":
@@ -727,7 +747,6 @@ def get_post_recommendations(
         query = query.filter(Post.city_id == target_post.city_id)
 
     posts = query.all()
-
     recommendations = []
 
     for post in posts:
@@ -762,6 +781,6 @@ def get_post_recommendations(
             }
         )
 
-    recommendations.sort(key=lambda x: x["recommendation_score"], reverse=True)
+    recommendations.sort(key=lambda item: item["recommendation_score"], reverse=True)
 
     return {"results": recommendations[:5]}
