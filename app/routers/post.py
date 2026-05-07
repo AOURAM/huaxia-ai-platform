@@ -4,7 +4,7 @@ import os
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -22,8 +22,8 @@ from app.schemas.post import (
     PostReactionRequest,
     PostResponse,
 )
-from app.services.ai_service import analyze_post
 from app.services.embedding_service import generate_embedding
+from app.services.post_enrichment_service import enrich_post_ai
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
@@ -109,6 +109,22 @@ def validate_city_for_post(
     return city.id
 
 
+def update_search_vector(db: Session, post_id: int) -> None:
+    db.execute(
+        text(
+            """
+            UPDATE posts
+            SET search_vector = to_tsvector(
+                'english',
+                coalesce(title, '') || ' ' || coalesce(content, '')
+            )
+            WHERE id = :post_id
+            """
+        ),
+        {"post_id": post_id},
+    )
+
+
 def serialize_post_response(post: Post) -> dict:
     return {
         "id": post.id,
@@ -144,21 +160,9 @@ def serialize_comment_detail(comment: Comment, username: str) -> dict:
     }
 
 
-def enrich_content_with_ai(content: str) -> tuple[dict, list[float]]:
-    ai_result = analyze_post(content)
-
-    try:
-        embedding = generate_embedding(content)
-    except Exception as error:
-        embedding = []
-        ai_result["status"] = "failed"
-        ai_result["error"] = f"Embedding generation failed: {error}"
-
-    return ai_result, embedding
-
-
 @router.post("/", response_model=PostResponse)
 def create_post(
+    background_tasks: BackgroundTasks,
     title: str = Form(...),
     content: str = Form(...),
     page_name: str = Form(...),
@@ -189,22 +193,20 @@ def create_post(
     validated_city_id = validate_city_for_post(page_name, city_id, db)
     image_url = save_uploaded_image(image)
 
-    ai_result, embedding = enrich_content_with_ai(content)
-
     new_post = Post(
         title=title,
         content=content,
         page_name=page_name,
         content_type=content_type,
         city_id=validated_city_id,
-        category_id=ai_result.get("category", "general"),
-        ai_status=ai_result.get("status", "failed"),
-        ai_error=ai_result.get("error"),
-        ai_analysis=ai_result.get("analysis", "AI analysis unavailable."),
+        category_id=None,
+        ai_status="pending",
+        ai_error=None,
+        ai_analysis="AI enrichment is pending.",
         ai_updated_at=datetime.now(timezone.utc),
-        summary=ai_result.get("summary", "No summary available."),
-        tags=json.dumps(ai_result.get("tags", ["general"])),
-        embedding=json.dumps(embedding),
+        summary="AI summary is being generated.",
+        tags=json.dumps([]),
+        embedding=None,
         image_url=image_url,
         user_id=current_user.id,
     )
@@ -213,22 +215,12 @@ def create_post(
     db.commit()
     db.refresh(new_post)
 
-    db.execute(
-        text(
-            """
-            UPDATE posts
-            SET search_vector = to_tsvector(
-                'english',
-                coalesce(title, '') || ' ' || coalesce(content, '')
-            )
-            WHERE id = :post_id
-            """
-        ),
-        {"post_id": new_post.id},
-    )
+    update_search_vector(db, new_post.id)
 
     db.commit()
     db.refresh(new_post)
+
+    background_tasks.add_task(enrich_post_ai, new_post.id, content)
 
     return serialize_post_response(new_post)
 
@@ -606,6 +598,7 @@ def get_post_detail(
 @router.put("/{post_id}", response_model=PostResponse)
 def update_post(
     post_id: int,
+    background_tasks: BackgroundTasks,
     title: str | None = Form(None),
     content: str | None = Form(None),
     page_name: str | None = Form(None),
@@ -672,37 +665,26 @@ def update_post(
         post.image_url = save_uploaded_image(image)
 
     if content_changed:
-        ai_result, embedding = enrich_content_with_ai(post.content)
-
-        post.category_id = ai_result.get("category", "general")
-        post.ai_status = ai_result.get("status", "failed")
-        post.ai_error = ai_result.get("error")
-        post.ai_analysis = ai_result.get("analysis", "AI analysis unavailable.")
+        post.category_id = None
+        post.ai_status = "pending"
+        post.ai_error = None
+        post.ai_analysis = "AI enrichment is pending."
         post.ai_updated_at = datetime.now(timezone.utc)
-        post.summary = ai_result.get("summary", "No summary available.")
-        post.tags = json.dumps(ai_result.get("tags", ["general"]))
-        post.embedding = json.dumps(embedding)
+        post.summary = "AI summary is being generated."
+        post.tags = json.dumps([])
+        post.embedding = None
 
     db.commit()
     db.refresh(post)
 
     if title is not None or content_changed:
-        db.execute(
-            text(
-                """
-                UPDATE posts
-                SET search_vector = to_tsvector(
-                    'english',
-                    coalesce(title, '') || ' ' || coalesce(content, '')
-                )
-                WHERE id = :post_id
-                """
-            ),
-            {"post_id": post.id},
-        )
+        update_search_vector(db, post.id)
 
         db.commit()
         db.refresh(post)
+
+    if content_changed:
+        background_tasks.add_task(enrich_post_ai, post.id, post.content)
 
     return serialize_post_response(post)
 
