@@ -4,6 +4,8 @@ export type PageName = 'cities' | 'universities' | 'culture' | 'daily_life';
 
 export type ContentType = 'question' | 'guide' | 'experience' | 'news' | 'tip';
 
+export type AiStatus = 'pending' | 'enriched' | 'failed' | string;
+
 export interface Post {
   id: number;
   title: string;
@@ -11,7 +13,12 @@ export interface Post {
   page_name: PageName;
   content_type: ContentType;
   category_id: string | null;
+
+  ai_status: AiStatus;
+  ai_error: string | null;
   ai_analysis: string | null;
+  ai_updated_at: string | null;
+
   summary: string | null;
   tags: string[] | null;
   image_url: string | null;

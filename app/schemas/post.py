@@ -4,25 +4,30 @@ from pydantic import BaseModel, field_validator
 
 from app.schemas.comment import CommentDetailResponse
 
+
 ALLOWED_PAGES = {"cities", "universities", "culture", "daily_life"}
 ALLOWED_CONTENT_TYPES = {"question", "guide", "experience", "news", "tip"}
 
 
 def normalize_page_name(value: str) -> str:
     value = value.strip().lower()
+
     if value not in ALLOWED_PAGES:
         raise ValueError(
             "page_name must be one of: cities, universities, culture, daily_life"
         )
+
     return value
 
 
 def normalize_content_type(value: str) -> str:
     value = value.strip().lower()
+
     if value not in ALLOWED_CONTENT_TYPES:
         raise ValueError(
             "content_type must be one of: question, guide, experience, news, tip"
         )
+
     return value
 
 
@@ -57,6 +62,7 @@ class PostUpdate(BaseModel):
     def validate_page_name(cls, value: str | None) -> str | None:
         if value is None:
             return value
+
         return normalize_page_name(value)
 
     @field_validator("content_type")
@@ -64,6 +70,7 @@ class PostUpdate(BaseModel):
     def validate_content_type(cls, value: str | None) -> str | None:
         if value is None:
             return value
+
         return normalize_content_type(value)
 
 
@@ -73,10 +80,17 @@ class PostResponse(BaseModel):
     content: str
     page_name: str
     content_type: str
+
     category_id: str | None = None
+
+    ai_status: str = "pending"
+    ai_error: str | None = None
     ai_analysis: str | None = None
+    ai_updated_at: datetime | None = None
+
     summary: str | None = None
     tags: list[str] | None = None
+
     likes_count: int
     dislikes_count: int
     created_at: datetime
@@ -100,6 +114,7 @@ class HybridSearchRequest(BaseModel):
     def validate_page_name(cls, value: str | None) -> str | None:
         if value is None:
             return value
+
         return normalize_page_name(value)
 
     @field_validator("content_type")
@@ -107,6 +122,7 @@ class HybridSearchRequest(BaseModel):
     def validate_content_type(cls, value: str | None) -> str | None:
         if value is None:
             return value
+
         return normalize_content_type(value)
 
     @field_validator("limit")
@@ -114,6 +130,7 @@ class HybridSearchRequest(BaseModel):
     def validate_limit(cls, value: int) -> int:
         if value < 1 or value > 50:
             raise ValueError("limit must be between 1 and 50")
+
         return value
 
 
@@ -127,6 +144,7 @@ class GlobalSearchRequest(BaseModel):
     def validate_per_page_limit(cls, value: int) -> int:
         if value < 1 or value > 20:
             raise ValueError("per_page_limit must be between 1 and 20")
+
         return value
 
     @field_validator("min_score")
@@ -134,6 +152,7 @@ class GlobalSearchRequest(BaseModel):
     def validate_min_score(cls, value: float) -> float:
         if value < 0 or value > 1:
             raise ValueError("min_score must be between 0 and 1")
+
         return value
 
 
@@ -144,8 +163,10 @@ class PostReactionRequest(BaseModel):
     @classmethod
     def validate_reaction_type(cls, value: str) -> str:
         value = value.strip().lower()
+
         if value not in {"like", "dislike"}:
             raise ValueError("reaction_type must be 'like' or 'dislike'")
+
         return value
 
 

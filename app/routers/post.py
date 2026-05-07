@@ -2,6 +2,7 @@ import json
 import math
 import os
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy import text
@@ -54,6 +55,23 @@ def parse_tags(tags_value):
     return []
 
 
+def parse_embedding(embedding_value) -> list[float] | None:
+    if embedding_value is None:
+        return None
+
+    if isinstance(embedding_value, list):
+        return embedding_value
+
+    if isinstance(embedding_value, str):
+        try:
+            parsed = json.loads(embedding_value)
+            return parsed if isinstance(parsed, list) else None
+        except json.JSONDecodeError:
+            return None
+
+    return None
+
+
 def save_uploaded_image(image: UploadFile | None) -> str | None:
     if image is None:
         return None
@@ -99,7 +117,10 @@ def serialize_post_response(post: Post) -> dict:
         "page_name": post.page_name,
         "content_type": post.content_type,
         "category_id": post.category_id,
+        "ai_status": post.ai_status,
+        "ai_error": post.ai_error,
         "ai_analysis": post.ai_analysis,
+        "ai_updated_at": post.ai_updated_at,
         "summary": post.summary,
         "tags": parse_tags(post.tags),
         "image_url": post.image_url,
@@ -121,6 +142,19 @@ def serialize_comment_detail(comment: Comment, username: str) -> dict:
         "post_id": comment.post_id,
         "username": username,
     }
+
+
+def enrich_content_with_ai(content: str) -> tuple[dict, list[float]]:
+    ai_result = analyze_post(content)
+
+    try:
+        embedding = generate_embedding(content)
+    except Exception as error:
+        embedding = []
+        ai_result["status"] = "failed"
+        ai_result["error"] = f"Embedding generation failed: {error}"
+
+    return ai_result, embedding
 
 
 @router.post("/", response_model=PostResponse)
@@ -155,8 +189,7 @@ def create_post(
     validated_city_id = validate_city_for_post(page_name, city_id, db)
     image_url = save_uploaded_image(image)
 
-    ai_result = analyze_post(content)
-    embedding = generate_embedding(content)
+    ai_result, embedding = enrich_content_with_ai(content)
 
     new_post = Post(
         title=title,
@@ -164,10 +197,13 @@ def create_post(
         page_name=page_name,
         content_type=content_type,
         city_id=validated_city_id,
-        category_id=ai_result["category"],
-        ai_analysis=ai_result["analysis"],
-        summary=ai_result["summary"],
-        tags=json.dumps(ai_result["tags"]),
+        category_id=ai_result.get("category", "general"),
+        ai_status=ai_result.get("status", "failed"),
+        ai_error=ai_result.get("error"),
+        ai_analysis=ai_result.get("analysis", "AI analysis unavailable."),
+        ai_updated_at=datetime.now(timezone.utc),
+        summary=ai_result.get("summary", "No summary available."),
+        tags=json.dumps(ai_result.get("tags", ["general"])),
         embedding=json.dumps(embedding),
         image_url=image_url,
         user_id=current_user.id,
@@ -223,7 +259,10 @@ def search_posts(
     request: HybridSearchRequest,
     db: Session = Depends(get_db),
 ):
-    query_embedding = generate_embedding(request.query)
+    try:
+        query_embedding = generate_embedding(request.query)
+    except Exception:
+        query_embedding = []
 
     sql = """
         SELECT
@@ -234,7 +273,10 @@ def search_posts(
             content_type,
             city_id,
             category_id,
+            ai_status,
+            ai_error,
             ai_analysis,
+            ai_updated_at,
             summary,
             tags,
             image_url,
@@ -269,11 +311,11 @@ def search_posts(
     scored_posts = []
 
     for post in keyword_results:
-        if not post["embedding"]:
-            continue
+        post_embedding = parse_embedding(post["embedding"])
+        semantic_score = 0.0
 
-        post_embedding = json.loads(post["embedding"])
-        semantic_score = cosine_similarity(query_embedding, post_embedding)
+        if query_embedding and post_embedding:
+            semantic_score = cosine_similarity(query_embedding, post_embedding)
 
         raw_keyword_score = (
             float(post["keyword_score"]) if post["keyword_score"] is not None else 0.0
@@ -290,7 +332,10 @@ def search_posts(
                 "content_type": post["content_type"],
                 "city_id": post["city_id"],
                 "category_id": post["category_id"],
+                "ai_status": post["ai_status"],
+                "ai_error": post["ai_error"],
                 "ai_analysis": post["ai_analysis"],
+                "ai_updated_at": post["ai_updated_at"],
                 "summary": post["summary"],
                 "tags": parse_tags(post["tags"]),
                 "image_url": post["image_url"],
@@ -314,7 +359,10 @@ def search_posts_globally(
     request: GlobalSearchRequest,
     db: Session = Depends(get_db),
 ):
-    query_embedding = generate_embedding(request.query)
+    try:
+        query_embedding = generate_embedding(request.query)
+    except Exception:
+        query_embedding = []
 
     sql = """
         SELECT
@@ -325,7 +373,10 @@ def search_posts_globally(
             content_type,
             city_id,
             category_id,
+            ai_status,
+            ai_error,
             ai_analysis,
+            ai_updated_at,
             summary,
             tags,
             image_url,
@@ -349,11 +400,11 @@ def search_posts_globally(
     }
 
     for post in all_posts:
-        if not post["embedding"]:
-            continue
+        post_embedding = parse_embedding(post["embedding"])
+        semantic_score = 0.0
 
-        post_embedding = json.loads(post["embedding"])
-        semantic_score = cosine_similarity(query_embedding, post_embedding)
+        if query_embedding and post_embedding:
+            semantic_score = cosine_similarity(query_embedding, post_embedding)
 
         raw_keyword_score = (
             float(post["keyword_score"]) if post["keyword_score"] is not None else 0.0
@@ -378,7 +429,10 @@ def search_posts_globally(
                 "content_type": post["content_type"],
                 "city_id": post["city_id"],
                 "category_id": post["category_id"],
+                "ai_status": post["ai_status"],
+                "ai_error": post["ai_error"],
                 "ai_analysis": post["ai_analysis"],
+                "ai_updated_at": post["ai_updated_at"],
                 "summary": post["summary"],
                 "tags": parse_tags(post["tags"]),
                 "image_url": post["image_url"],
@@ -485,7 +539,7 @@ def get_post_detail(
 
     user_reaction = existing_reaction.reaction_type if existing_reaction else None
 
-    target_embedding = json.loads(post.embedding) if post.embedding else None
+    target_embedding = parse_embedding(post.embedding)
     recommendations = []
 
     if target_embedding:
@@ -500,11 +554,12 @@ def get_post_detail(
         posts = query.all()
 
         for candidate_post in posts:
-            if not candidate_post.embedding:
+            candidate_embedding = parse_embedding(candidate_post.embedding)
+
+            if not candidate_embedding:
                 continue
 
-            post_embedding = json.loads(candidate_post.embedding)
-            similarity = cosine_similarity(target_embedding, post_embedding)
+            similarity = cosine_similarity(target_embedding, candidate_embedding)
 
             raw_engagement = (
                 candidate_post.likes_count * 2
@@ -617,13 +672,15 @@ def update_post(
         post.image_url = save_uploaded_image(image)
 
     if content_changed:
-        ai_result = analyze_post(post.content)
-        embedding = generate_embedding(post.content)
+        ai_result, embedding = enrich_content_with_ai(post.content)
 
-        post.category_id = ai_result["category"]
-        post.ai_analysis = ai_result["analysis"]
-        post.summary = ai_result["summary"]
-        post.tags = json.dumps(ai_result["tags"])
+        post.category_id = ai_result.get("category", "general")
+        post.ai_status = ai_result.get("status", "failed")
+        post.ai_error = ai_result.get("error")
+        post.ai_analysis = ai_result.get("analysis", "AI analysis unavailable.")
+        post.ai_updated_at = datetime.now(timezone.utc)
+        post.summary = ai_result.get("summary", "No summary available.")
+        post.tags = json.dumps(ai_result.get("tags", ["general"]))
         post.embedding = json.dumps(embedding)
 
     db.commit()
@@ -736,7 +793,10 @@ def get_post_recommendations(
     if not target_post or not target_post.embedding:
         return {"results": []}
 
-    target_embedding = json.loads(target_post.embedding)
+    target_embedding = parse_embedding(target_post.embedding)
+
+    if not target_embedding:
+        return {"results": []}
 
     query = db.query(Post).filter(Post.id != post_id)
 
@@ -750,10 +810,11 @@ def get_post_recommendations(
     recommendations = []
 
     for post in posts:
-        if not post.embedding:
+        post_embedding = parse_embedding(post.embedding)
+
+        if not post_embedding:
             continue
 
-        post_embedding = json.loads(post.embedding)
         similarity = cosine_similarity(target_embedding, post_embedding)
 
         raw_engagement = (post.likes_count * 2) - post.dislikes_count

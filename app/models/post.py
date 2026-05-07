@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -16,7 +16,12 @@ class Post(Base):
     content_type = Column(String(50), nullable=False, index=True)
 
     category_id = Column(String(100), nullable=True, index=True)
+
+    ai_status = Column(String(20), nullable=False, default="pending", index=True)
+    ai_error = Column(Text, nullable=True)
     ai_analysis = Column(Text, nullable=True)
+    ai_updated_at = Column(DateTime(timezone=True), nullable=True)
+
     summary = Column(Text, nullable=True)
     tags = Column(Text, nullable=True)
 
