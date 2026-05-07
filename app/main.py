@@ -6,9 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.database import Base, engine
-
-# Import models so SQLAlchemy registers all tables before create_all.
+# Import models so SQLAlchemy metadata is registered for the app runtime.
 import app.models.user
 import app.models.post
 import app.models.post_reaction
@@ -41,12 +39,6 @@ app.add_middleware(
 )
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
-
-@app.on_event("startup")
-def startup():
-    Base.metadata.create_all(bind=engine)
-
 
 app.include_router(post_router)
 app.include_router(user_router)
