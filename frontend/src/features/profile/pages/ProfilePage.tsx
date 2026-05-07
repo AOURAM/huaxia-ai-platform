@@ -8,7 +8,6 @@ import {
   RefreshCcw,
   Save,
   ShieldCheck,
-  UserCircle,
   X,
 } from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
@@ -74,7 +73,6 @@ function formatGender(gender?: GenderValue | null) {
   }
 
   const option = genderOptions.find((item) => item.value === gender);
-
   return option?.label ?? 'Not set';
 }
 
@@ -90,12 +88,6 @@ function getDefaultAvatarStyle(user?: User | null): AvatarStyle {
   return user?.avatar_style || 'adventurer';
 }
 
-function buildDiceBearAvatarUrl(style: AvatarStyle, seed: string) {
-  const safeSeed = encodeURIComponent(seed.trim() || 'huaxia-user');
-
-  return `https://api.dicebear.com/9.x/${style}/svg?seed=${safeSeed}&size=128&radius=50`;
-}
-
 function buildInitialFormState(user?: User | null): ProfileFormState {
   return {
     username: user?.username ?? '',
@@ -104,6 +96,152 @@ function buildInitialFormState(user?: User | null): ProfileFormState {
     avatar_style: getDefaultAvatarStyle(user),
     avatar_seed: getDefaultAvatarSeed(user),
   };
+}
+
+function hashString(value: string) {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index);
+    hash |= 0;
+  }
+
+  return Math.abs(hash);
+}
+
+function getInitials(username: string) {
+  const cleanUsername = username.trim();
+
+  if (!cleanUsername) {
+    return 'HX';
+  }
+
+  const words = cleanUsername.split(/\s+/).filter(Boolean);
+
+  if (words.length >= 2) {
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  return cleanUsername.slice(0, 2).toUpperCase();
+}
+
+interface LocalAvatarProps {
+  username: string;
+  style: AvatarStyle;
+  seed: string;
+  size?: 'lg' | 'xl';
+}
+
+function LocalAvatar({
+  username,
+  style,
+  seed,
+  size = 'xl',
+}: LocalAvatarProps) {
+  const hash = hashString(`${style}-${seed}-${username}`);
+  const initials = getInitials(username);
+
+  const sizeClass = size === 'xl' ? 'h-28 w-28 text-3xl' : 'h-24 w-24 text-2xl';
+
+  const faceOffset = hash % 3;
+  const eyeShape = hash % 2 === 0 ? 'rounded-full' : 'rounded-sm';
+  const mouthWidth = hash % 2 === 0 ? 'w-8' : 'w-5';
+
+  if (style === 'initials') {
+    return (
+      <div
+        className={`${sizeClass} flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-brand-primary font-serif font-black text-white shadow-sm`}
+      >
+        {initials}
+      </div>
+    );
+  }
+
+  if (style === 'bottts') {
+    return (
+      <div
+        className={`${sizeClass} relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-brand-neutral-soft shadow-sm`}
+      >
+        <div className="absolute top-5 h-4 w-12 rounded-full border border-brand-primary bg-white" />
+        <div className="absolute left-5 top-10 h-3 w-3 rounded-full bg-brand-primary" />
+        <div className="absolute right-5 top-10 h-3 w-3 rounded-full bg-brand-primary" />
+        <div className="absolute bottom-6 h-2 w-10 rounded-full bg-brand-primary/80" />
+        <div className="absolute bottom-2 text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary">
+          bot
+        </div>
+      </div>
+    );
+  }
+
+  if (style === 'thumbs') {
+    return (
+      <div
+        className={`${sizeClass} relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-white shadow-sm`}
+      >
+        <div className="absolute inset-3 rounded-full bg-brand-neutral-soft" />
+        <div className="absolute top-6 h-9 w-9 rounded-full bg-brand-primary/90" />
+        <div className="absolute bottom-5 h-8 w-16 rounded-t-full bg-brand-primary/80" />
+        <span className="relative z-10 mt-2 font-serif font-black text-white">
+          {initials[0]}
+        </span>
+      </div>
+    );
+  }
+
+  if (style === 'personas') {
+    return (
+      <div
+        className={`${sizeClass} relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-brand-neutral-soft shadow-sm`}
+      >
+        <div className="absolute top-5 h-14 w-14 rounded-full bg-white" />
+        <div className="absolute bottom-3 h-12 w-20 rounded-t-full bg-brand-primary" />
+        <div className="absolute left-10 top-11 h-2 w-2 rounded-full bg-brand-on-surface" />
+        <div className="absolute right-10 top-11 h-2 w-2 rounded-full bg-brand-on-surface" />
+        <div className="absolute top-16 h-1 w-8 rounded-full bg-brand-primary" />
+      </div>
+    );
+  }
+
+  if (style === 'lorelei') {
+    return (
+      <div
+        className={`${sizeClass} relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-white shadow-sm`}
+      >
+        <div className="absolute top-4 h-20 w-20 rounded-full bg-brand-primary/15" />
+        <div className="absolute top-7 h-12 w-16 rounded-t-full bg-brand-primary" />
+        <div className="absolute top-12 h-10 w-12 rounded-full bg-brand-neutral-soft" />
+        <div className="absolute left-10 top-15 h-2 w-2 rounded-full bg-brand-on-surface" />
+        <div className="absolute right-10 top-15 h-2 w-2 rounded-full bg-brand-on-surface" />
+      </div>
+    );
+  }
+
+  if (style === 'avataaars') {
+    return (
+      <div
+        className={`${sizeClass} relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-brand-neutral-soft shadow-sm`}
+      >
+        <div className="absolute top-4 h-9 w-20 rounded-t-full bg-brand-on-surface" />
+        <div className="absolute top-10 h-14 w-14 rounded-full bg-white" />
+        <div className={`absolute top-${faceOffset + 14} left-10 h-2 w-2 ${eyeShape} bg-brand-on-surface`} />
+        <div className={`absolute top-${faceOffset + 14} right-10 h-2 w-2 ${eyeShape} bg-brand-on-surface`} />
+        <div className={`absolute bottom-8 h-1 ${mouthWidth} rounded-full bg-brand-primary`} />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${sizeClass} relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-brand-neutral-soft shadow-sm`}
+    >
+      <div className="absolute inset-3 rounded-full border border-brand-primary/30" />
+      <div className="absolute top-6 h-11 w-11 rounded-full bg-white" />
+      <div className="absolute bottom-4 h-10 w-20 rounded-t-full bg-brand-primary/80" />
+      <div className="absolute left-10 top-12 h-2 w-2 rounded-full bg-brand-on-surface" />
+      <div className="absolute right-10 top-12 h-2 w-2 rounded-full bg-brand-on-surface" />
+      <div className="absolute top-17 h-1 w-8 rounded-full bg-brand-primary" />
+    </div>
+  );
 }
 
 export function ProfilePage() {
@@ -124,7 +262,7 @@ export function ProfilePage() {
   const updateProfileMutation = useUpdateCurrentUser();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [formState, setFormState] = useState<ProfileFormState>(() => buildInitialFormState(null));
+  const [formState, setFormState] = useState(() => buildInitialFormState(null));
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -135,13 +273,27 @@ export function ProfilePage() {
 
   const userPosts = user ? allPosts.filter((post) => post.user_id === user.id) : [];
 
-  const avatarPreviewUrl = useMemo(() => {
-    return buildDiceBearAvatarUrl(formState.avatar_style, formState.avatar_seed);
-  }, [formState.avatar_seed, formState.avatar_style]);
+  const visibleAvatarState = useMemo(() => {
+    if (isEditing) {
+      return {
+        username: formState.username,
+        style: formState.avatar_style,
+        seed: formState.avatar_seed,
+      };
+    }
 
-  const visibleAvatarUrl = isEditing
-    ? avatarPreviewUrl
-    : user?.avatar_url || buildDiceBearAvatarUrl(getDefaultAvatarStyle(user), getDefaultAvatarSeed(user));
+    return {
+      username: user?.username ?? '',
+      style: getDefaultAvatarStyle(user),
+      seed: getDefaultAvatarSeed(user),
+    };
+  }, [
+    formState.avatar_seed,
+    formState.avatar_style,
+    formState.username,
+    isEditing,
+    user,
+  ]);
 
   const updateForm = <K extends keyof ProfileFormState>(
     key: K,
@@ -169,7 +321,7 @@ export function ProfilePage() {
     updateProfileMutation.reset();
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
 
     if (!user || updateProfileMutation.isPending) {
@@ -209,53 +361,48 @@ export function ProfilePage() {
         : null;
 
   return (
-    <div className="min-h-screen bg-brand-surface">
-      <main className="mx-auto w-full max-w-[1280px] space-y-8 px-4 py-8 md:px-6">
+    <div className="min-h-screen bg-brand-neutral-soft">
+      <main className="mx-auto max-w-6xl px-6 py-10">
         {isUserLoading ? (
-          <section className="rounded-2xl border border-brand-outline bg-white p-10 text-center text-brand-on-surface/60 shadow-sm">
+          <div className="rounded-3xl border border-brand-outline bg-white p-10 text-center text-sm font-bold text-brand-on-surface/55">
             Loading profile...
-          </section>
+          </div>
         ) : null}
 
         {isUserError ? (
-          <section className="rounded-2xl border border-brand-danger/20 bg-brand-danger/10 p-10 text-center text-brand-danger">
+          <div className="rounded-3xl border border-brand-danger/20 bg-brand-danger/10 p-10 text-center text-sm font-bold text-brand-danger">
             Could not load your profile. Check that you are logged in.
-          </section>
+          </div>
         ) : null}
 
         {!isUserLoading && !isUserError && user ? (
           <>
-            <section className="rounded-3xl border border-brand-outline bg-white p-7 shadow-sm md:p-8">
-              <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                  <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-brand-neutral-soft text-brand-primary">
-                    {visibleAvatarUrl ? (
-                      <img
-                        src={visibleAvatarUrl}
-                        alt={`${user.username} avatar`}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <UserCircle className="h-14 w-14" />
-                    )}
-                  </div>
+            <section className="rounded-3xl border border-brand-outline bg-white p-8 shadow-sm">
+              <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+                <div className="flex flex-col gap-6 md:flex-row md:items-center">
+                  <LocalAvatar
+                    username={visibleAvatarState.username}
+                    style={visibleAvatarState.style}
+                    seed={visibleAvatarState.seed}
+                    size="xl"
+                  />
 
                   <div>
-                    <p className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.2em] text-brand-primary">
+                    <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.35em] text-brand-primary">
                       <ShieldCheck className="h-4 w-4" />
                       User profile
-                    </p>
+                    </div>
 
-                    <h1 className="font-serif text-4xl font-bold text-brand-on-surface">
+                    <h1 className="font-serif text-5xl font-black text-brand-on-surface">
                       {user.username}
                     </h1>
 
-                    <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-brand-on-surface/55">
+                    <div className="mt-4 flex items-center gap-2 text-sm font-bold text-brand-on-surface/55">
                       <Mail className="h-4 w-4" />
                       {user.email}
-                    </p>
+                    </div>
 
-                    <p className="mt-2 text-sm font-semibold text-brand-on-surface/55">
+                    <p className="mt-3 text-sm font-bold text-brand-on-surface/55">
                       Gender: {formatGender(user.gender)}
                     </p>
                   </div>
@@ -278,7 +425,7 @@ export function ProfilePage() {
                   <button
                     type="button"
                     onClick={logout}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-outline bg-brand-neutral-soft px-5 py-3 text-sm font-bold text-brand-on-surface/65 transition hover:border-brand-danger hover:text-brand-danger"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-outline bg-white px-5 py-3 text-sm font-bold text-brand-on-surface/65 transition hover:bg-brand-neutral-soft"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign out
@@ -287,138 +434,131 @@ export function ProfilePage() {
               </div>
 
               {!isEditing ? (
-                <div className="mt-8 rounded-2xl border border-brand-outline bg-brand-neutral-soft p-5">
-                  <h2 className="mb-2 font-serif text-2xl font-bold text-brand-on-surface">
+                <div className="mt-8 rounded-2xl border border-brand-outline bg-brand-surface p-6">
+                  <h2 className="font-serif text-2xl font-black text-brand-on-surface">
                     Bio
                   </h2>
 
-                  <p className="leading-7 text-brand-on-surface/65">
+                  <p className="mt-3 text-sm leading-relaxed text-brand-on-surface/60">
                     {user.bio || 'No bio added yet. Edit your profile to introduce yourself.'}
                   </p>
                 </div>
               ) : null}
 
               {successMessage ? (
-                <div className="mt-6 flex items-center gap-2 rounded-xl border border-brand-success/20 bg-brand-success/10 p-4 text-sm font-bold text-brand-success">
+                <div className="mt-6 flex items-center gap-2 rounded-xl border border-brand-primary/20 bg-brand-primary/10 p-4 text-sm font-bold text-brand-primary">
                   <Check className="h-4 w-4" />
                   {successMessage}
                 </div>
               ) : null}
 
               {isEditing ? (
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.1fr]">
-                    <section className="rounded-2xl border border-brand-outline bg-brand-neutral-soft p-5">
-                      <h2 className="font-serif text-2xl font-bold text-brand-on-surface">
-                        Avatar
-                      </h2>
+                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+                  <section className="rounded-3xl border border-brand-outline bg-brand-surface p-6">
+                    <h2 className="font-serif text-3xl font-black text-brand-on-surface">
+                      Avatar
+                    </h2>
 
-                      <p className="mt-1 text-sm text-brand-on-surface/60">
-                        Choose a generated avatar style. No upload is needed.
-                      </p>
+                    <p className="mt-2 text-sm text-brand-on-surface/60">
+                      Choose a generated avatar style. No upload is needed.
+                    </p>
 
-                      <div className="mt-5 flex items-center gap-4">
-                        <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-outline bg-white">
-                          <img
-                            src={avatarPreviewUrl}
-                            alt="Avatar preview"
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
+                    <div className="mt-7 flex flex-col gap-6 md:flex-row md:items-center">
+                      <LocalAvatar
+                        username={formState.username || user.username}
+                        style={formState.avatar_style}
+                        seed={formState.avatar_seed}
+                        size="lg"
+                      />
 
-                        <button
-                          type="button"
-                          onClick={randomizeAvatarSeed}
-                          className="inline-flex items-center gap-2 rounded-full border border-brand-outline bg-white px-4 py-2 text-sm font-bold text-brand-primary transition hover:border-brand-primary"
-                        >
-                          <RefreshCcw className="h-4 w-4" />
-                          New avatar
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={randomizeAvatarSeed}
+                        className="inline-flex w-fit items-center justify-center gap-2 rounded-full border border-brand-outline bg-white px-5 py-3 text-sm font-bold text-brand-primary transition hover:border-brand-primary"
+                      >
+                        <RefreshCcw className="h-4 w-4" />
+                        New avatar
+                      </button>
+                    </div>
 
-                      <div className="mt-5 grid grid-cols-2 gap-2">
-                        {avatarStyles.map((style) => {
-                          const active = formState.avatar_style === style.value;
+                    <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                      {avatarStyles.map((style) => {
+                        const active = formState.avatar_style === style.value;
 
-                          return (
-                            <button
-                              key={style.value}
-                              type="button"
-                              onClick={() => updateForm('avatar_style', style.value)}
-                              className={`rounded-xl border px-3 py-2 text-sm font-bold transition ${
-                                active
-                                  ? 'border-brand-primary bg-brand-primary text-white'
-                                  : 'border-brand-outline bg-white text-brand-on-surface/65 hover:border-brand-primary hover:text-brand-primary'
-                              }`}
-                            >
-                              {style.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </section>
-
-                    <section className="rounded-2xl border border-brand-outline bg-brand-neutral-soft p-5">
-                      <h2 className="font-serif text-2xl font-bold text-brand-on-surface">
-                        Profile details
-                      </h2>
-
-                      <div className="mt-5 space-y-4">
-                        <label className="block">
-                          <span className="mb-2 block text-sm font-bold text-brand-on-surface/65">
-                            Display name
-                          </span>
-
-                          <input
-                            value={formState.username}
-                            onChange={(event) => updateForm('username', event.target.value)}
-                            className="w-full rounded-xl border border-brand-outline bg-white px-4 py-3 text-brand-on-surface outline-none transition placeholder:text-brand-on-surface/35 focus:border-brand-primary"
-                            placeholder="Your display name"
-                            required
-                          />
-                        </label>
-
-                        <label className="block">
-                          <span className="mb-2 block text-sm font-bold text-brand-on-surface/65">
-                            Gender
-                          </span>
-
-                          <select
-                            value={formState.gender}
-                            onChange={(event) =>
-                              updateForm('gender', event.target.value as GenderValue | '')
-                            }
-                            className="w-full rounded-xl border border-brand-outline bg-white px-4 py-3 text-brand-on-surface outline-none transition focus:border-brand-primary"
+                        return (
+                          <button
+                            key={style.value}
+                            type="button"
+                            onClick={() => updateForm('avatar_style', style.value)}
+                            className={`rounded-xl border px-3 py-3 text-sm font-bold transition ${
+                              active
+                                ? 'border-brand-primary bg-brand-primary text-white'
+                                : 'border-brand-outline bg-white text-brand-on-surface/65 hover:border-brand-primary hover:text-brand-primary'
+                            }`}
                           >
-                            <option value="">Not set</option>
-                            {genderOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
+                            {style.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
 
-                        <label className="block">
-                          <span className="mb-2 block text-sm font-bold text-brand-on-surface/65">
-                            Bio
-                          </span>
+                  <section className="rounded-3xl border border-brand-outline bg-brand-surface p-6">
+                    <h2 className="font-serif text-3xl font-black text-brand-on-surface">
+                      Profile details
+                    </h2>
 
-                          <textarea
-                            value={formState.bio}
-                            onChange={(event) => updateForm('bio', event.target.value)}
-                            className="min-h-[140px] w-full resize-none rounded-xl border border-brand-outline bg-white px-4 py-3 text-brand-on-surface outline-none transition placeholder:text-brand-on-surface/35 focus:border-brand-primary"
-                            maxLength={500}
-                            placeholder="Write a short introduction about yourself..."
-                          />
+                    <div className="mt-6 grid gap-5 md:grid-cols-2">
+                      <label className="block">
+                        <span className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-brand-on-surface/45">
+                          Display name
+                        </span>
+                        <input
+                          value={formState.username}
+                          onChange={(event) => updateForm('username', event.target.value)}
+                          className="w-full rounded-xl border border-brand-outline bg-white px-4 py-3 text-brand-on-surface outline-none transition placeholder:text-brand-on-surface/35 focus:border-brand-primary"
+                          placeholder="Your display name"
+                          required
+                        />
+                      </label>
 
-                          <span className="mt-2 block text-right text-xs font-semibold text-brand-on-surface/45">
-                            {formState.bio.length}/500
-                          </span>
-                        </label>
-                      </div>
-                    </section>
-                  </div>
+                      <label className="block">
+                        <span className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-brand-on-surface/45">
+                          Gender
+                        </span>
+                        <select
+                          value={formState.gender}
+                          onChange={(event) =>
+                            updateForm('gender', event.target.value as GenderValue | '')
+                          }
+                          className="w-full rounded-xl border border-brand-outline bg-white px-4 py-3 text-brand-on-surface outline-none transition focus:border-brand-primary"
+                        >
+                          <option value="">Not set</option>
+                          {genderOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="block md:col-span-2">
+                        <span className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-brand-on-surface/45">
+                          Bio
+                        </span>
+                        <textarea
+                          value={formState.bio}
+                          onChange={(event) => updateForm('bio', event.target.value)}
+                          className="min-h-[140px] w-full resize-none rounded-xl border border-brand-outline bg-white px-4 py-3 text-brand-on-surface outline-none transition placeholder:text-brand-on-surface/35 focus:border-brand-primary"
+                          maxLength={500}
+                          placeholder="Write a short introduction about yourself..."
+                        />
+                        <span className="mt-2 block text-right text-xs font-semibold text-brand-on-surface/45">
+                          {formState.bio.length}/500
+                        </span>
+                      </label>
+                    </div>
+                  </section>
 
                   {profileErrorMessage ? (
                     <div className="rounded-xl border border-brand-danger/20 bg-brand-danger/10 p-4 text-sm font-semibold text-brand-danger">
@@ -453,11 +593,9 @@ export function ProfilePage() {
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-neutral-soft text-brand-primary">
                     <MessageSquareText className="h-5 w-5" />
                   </div>
-
                   <p className="font-serif text-3xl font-bold text-brand-primary">
                     {userPosts.length}
                   </p>
-
                   <p className="mt-1 text-sm font-semibold text-brand-on-surface/55">
                     Posts created
                   </p>
@@ -467,11 +605,9 @@ export function ProfilePage() {
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-neutral-soft text-brand-primary">
                     <CalendarDays className="h-5 w-5" />
                   </div>
-
                   <p className="font-serif text-xl font-bold text-brand-on-surface">
                     {formatJoinDate(user.created_at)}
                   </p>
-
                   <p className="mt-1 text-sm font-semibold text-brand-on-surface/55">
                     Account date
                   </p>
@@ -481,9 +617,9 @@ export function ProfilePage() {
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-neutral-soft text-brand-primary">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
-
-                  <p className="font-serif text-xl font-bold text-brand-on-surface">Active</p>
-
+                  <p className="font-serif text-xl font-bold text-brand-on-surface">
+                    Active
+                  </p>
                   <p className="mt-1 text-sm font-semibold text-brand-on-surface/55">
                     Session status
                   </p>
@@ -491,13 +627,12 @@ export function ProfilePage() {
               </div>
             </section>
 
-            <section>
+            <section className="mt-10">
               <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                   <h2 className="font-serif text-3xl font-bold text-brand-on-surface">
                     My discussions
                   </h2>
-
                   <p className="text-sm text-brand-on-surface/60">
                     Posts you created across Huaxia thematic pages.
                   </p>
