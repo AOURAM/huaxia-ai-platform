@@ -1,18 +1,18 @@
-import { useState } from 'react';
+import { type FormEvent, type MouseEvent, useState } from 'react';
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 import { Check, Eye, EyeOff, Loader2, Sparkles, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import signInBg from '@/assets/signin-bg.jpg';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ApiError } from '@/lib/http';
 import { cn } from '@/lib/utils';
-import { Button } from '@/shared/components/common/Button';
 import { Input } from '@/shared/components/common/Input';
 import { StatusBanner } from '@/shared/components/common/StatusBanner';
 
 type SubmitStatus = 'idle' | 'loading' | 'success' | 'error';
+
+const signInBg = '/images/signin-bg.webp';
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ export function LoginForm() {
   const cardX = useTransform(springX, [-0.5, 0.5], ['-10px', '10px']);
   const cardY = useTransform(springY, [-0.5, 0.5], ['-10px', '10px']);
 
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
     const { clientX, clientY, currentTarget } = event;
     const rect = currentTarget.getBoundingClientRect();
     const x = (clientX - rect.left) / rect.width - 0.5;
@@ -45,7 +45,7 @@ export function LoginForm() {
     mouseY.set(y);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setStatus('loading');
     setErrorMessage(null);
@@ -199,21 +199,6 @@ export function LoginForm() {
                 )}
               </AnimatePresence>
             </motion.button>
-
-            <div className="relative flex items-center gap-4 py-2">
-              <div className="h-px flex-1 bg-brand-outline/50" />
-              <span className="text-sm font-medium lowercase text-brand-on-surface/40">
-                or continue with
-              </span>
-              <div className="h-px flex-1 bg-brand-outline/50" />
-            </div>
-
-            <Button variant="outline" className="w-full gap-3 py-4" type="button" disabled>
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand-neutral-soft text-xs font-bold text-brand-primary">
-                G
-              </span>
-              Continue with Google
-            </Button>
           </form>
 
           <p className="text-center text-brand-on-surface/60">

@@ -775,7 +775,21 @@ def delete_post(
         raise HTTPException(status_code=404, detail="Post not found")
 
     if post.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this post")
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to delete this post",
+        )
+
+    # Delete child records first.
+    # Otherwise PostgreSQL may block deleting the post because comments/reactions
+    # still reference posts.id.
+    db.query(Comment).filter(Comment.post_id == post_id).delete(
+        synchronize_session=False
+    )
+
+    db.query(PostReaction).filter(PostReaction.post_id == post_id).delete(
+        synchronize_session=False
+    )
 
     db.delete(post)
     db.commit()
