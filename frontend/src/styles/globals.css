@@ -1,31 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
+  --font-sans:
+    "Plus Jakarta Sans", "Noto Sans", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 
-  --color-brand-primary: #92000c;
-  --color-brand-primary-hover: #ba181b;
-  --color-brand-surface: #fff8f7;
-  --color-brand-on-surface: #201a1a;
-  --color-brand-outline: #e4beb9;
-  --color-brand-neutral-soft: #f7ebea;
-  --color-brand-success: #047857;
-  --color-brand-danger: #b91c1c;
-  --color-brand-accent: #c97a83;
+  --font-serif:
+    "Plus Jakarta Sans", "Noto Sans", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+
+  --color-space-indigo: #2b2d42;
+  --color-lavender-grey: #8d99ae;
+  --color-platinum: #edf2f4;
+  --color-punch-red: #ef233c;
+  --color-flag-red: #d90429;
+
+  --color-brand-primary: #ef233c;
+  --color-brand-primary-hover: #d90429;
+  --color-brand-surface: #edf2f4;
+  --color-brand-on-surface: #2b2d42;
+  --color-brand-outline: #8d99ae;
+  --color-brand-neutral-soft: #edf2f4;
+  --color-brand-success: #2b2d42;
+  --color-brand-danger: #d90429;
+  --color-brand-accent: #ef233c;
+
+  --color-white: #edf2f4;
+  --color-black: #2b2d42;
+}
+
+:root {
+  --space-indigo: #2b2d42;
+  --lavender-grey: #8d99ae;
+  --platinum: #edf2f4;
+  --punch-red: #ef233c;
+  --flag-red: #d90429;
+
+  background: var(--platinum);
+  color: var(--space-indigo);
+  color-scheme: light;
 }
 
 :root[data-theme='night'] {
-  --color-brand-primary: #f08a94;
-  --color-brand-primary-hover: #ff9fa8;
-  --color-brand-surface: #211719;
-  --color-brand-on-surface: #f7ecec;
-  --color-brand-outline: #5a3a3f;
-  --color-brand-neutral-soft: #302326;
-  --color-brand-success: #64d6a1;
-  --color-brand-danger: #ff9b9b;
-  --color-brand-accent: #d48b93;
+  --color-brand-primary: #ef233c;
+  --color-brand-primary-hover: #d90429;
+  --color-brand-surface: #2b2d42;
+  --color-brand-on-surface: #edf2f4;
+  --color-brand-outline: #8d99ae;
+  --color-brand-neutral-soft: #2b2d42;
+  --color-brand-success: #edf2f4;
+  --color-brand-danger: #ef233c;
+  --color-brand-accent: #ef233c;
+
+  background: var(--space-indigo);
+  color: var(--platinum);
+  color-scheme: dark;
 }
 
 * {
@@ -39,14 +69,25 @@ body,
 }
 
 html {
-  background: var(--color-brand-surface);
+  background:
+    radial-gradient(circle at top left, rgba(239, 35, 60, 0.12), transparent 28rem),
+    var(--color-brand-surface);
 }
 
 body {
   margin: 0;
-  background: var(--color-brand-surface);
+  min-width: 320px;
+  background:
+    linear-gradient(180deg, rgba(43, 45, 66, 0.04), transparent 18rem),
+    var(--color-brand-surface);
   color: var(--color-brand-on-surface);
   font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: -0.012em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button,
@@ -62,6 +103,7 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+  opacity: 0.65;
 }
 
 a {
@@ -69,104 +111,185 @@ a {
   text-decoration: none;
 }
 
-::selection {
-  background: rgba(146, 0, 12, 0.18);
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-serif {
+  font-family: var(--font-sans);
+  letter-spacing: -0.035em;
 }
 
-/* Night mode compatibility for existing light-mode utilities */
+p,
+li,
+input,
+textarea,
+select,
+button {
+  letter-spacing: -0.006em;
+}
+
+::selection {
+  background: rgba(239, 35, 60, 0.22);
+  color: var(--space-indigo);
+}
+
+/* Force old white/black utilities back into the approved palette. */
+.bg-white {
+  background-color: var(--platinum) !important;
+}
+
+.text-white {
+  color: var(--platinum) !important;
+}
+
+.bg-black {
+  background-color: var(--space-indigo) !important;
+}
+
+.text-black {
+  color: var(--space-indigo) !important;
+}
+
+/* Make cards feel like forum cards, not floating SaaS panels. */
+.rounded-3xl,
+.rounded-\[2rem\] {
+  border-radius: 1.25rem !important;
+}
+
+.shadow-sm,
+.shadow,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl {
+  box-shadow: 0 10px 28px rgba(43, 45, 66, 0.08) !important;
+}
+
+/* Form readability */
+input,
+textarea,
+select {
+  border-color: rgba(141, 153, 174, 0.55);
+  background-color: rgba(237, 242, 244, 0.92);
+  color: var(--space-indigo);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(43, 45, 66, 0.52);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 3px solid rgba(239, 35, 60, 0.18);
+  outline-offset: 2px;
+}
+
+/* Keep legacy danger/status classes inside the approved palette. */
+.bg-red-50,
+.bg-brand-danger\/10 {
+  background-color: rgba(239, 35, 60, 0.12) !important;
+}
+
+.text-red-700,
+.text-brand-danger {
+  color: var(--flag-red) !important;
+}
+
+.border-red-200,
+.border-brand-danger\/20 {
+  border-color: rgba(217, 4, 41, 0.28) !important;
+}
+
+/* Existing night-mode compatibility, but no illegal extra colors. */
+:root[data-theme='night'] html,
+:root[data-theme='night'] body {
+  background: var(--space-indigo);
+  color: var(--platinum);
+}
 
 :root[data-theme='night'] .bg-white {
-  background-color: #2a1d20 !important;
+  background-color: var(--space-indigo) !important;
 }
 
 :root[data-theme='night'] .bg-brand-surface {
-  background-color: var(--color-brand-surface) !important;
+  background-color: var(--space-indigo) !important;
 }
 
 :root[data-theme='night'] .bg-brand-neutral-soft {
-  background-color: var(--color-brand-neutral-soft) !important;
+  background-color: rgba(237, 242, 244, 0.08) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface {
-  color: var(--color-brand-on-surface) !important;
+  color: var(--platinum) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/75 {
-  color: rgba(247, 236, 236, 0.75) !important;
+  color: rgba(237, 242, 244, 0.75) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/70 {
-  color: rgba(247, 236, 236, 0.7) !important;
+  color: rgba(237, 242, 244, 0.7) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/65 {
-  color: rgba(247, 236, 236, 0.65) !important;
+  color: rgba(237, 242, 244, 0.65) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/60 {
-  color: rgba(247, 236, 236, 0.6) !important;
+  color: rgba(237, 242, 244, 0.6) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/55 {
-  color: rgba(247, 236, 236, 0.55) !important;
+  color: rgba(237, 242, 244, 0.55) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/50 {
-  color: rgba(247, 236, 236, 0.5) !important;
+  color: rgba(237, 242, 244, 0.5) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/45 {
-  color: rgba(247, 236, 236, 0.45) !important;
+  color: rgba(237, 242, 244, 0.45) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/40 {
-  color: rgba(247, 236, 236, 0.4) !important;
+  color: rgba(237, 242, 244, 0.4) !important;
 }
 
 :root[data-theme='night'] .text-brand-on-surface\/35 {
-  color: rgba(247, 236, 236, 0.35) !important;
+  color: rgba(237, 242, 244, 0.35) !important;
 }
 
-:root[data-theme='night'] .border-brand-outline {
-  border-color: var(--color-brand-outline) !important;
-}
-
-:root[data-theme='night'] .border-brand-outline\/40 {
-  border-color: rgba(90, 58, 63, 0.4) !important;
-}
-
+:root[data-theme='night'] .border-brand-outline,
+:root[data-theme='night'] .border-brand-outline\/40,
 :root[data-theme='night'] .border-brand-outline\/50 {
-  border-color: rgba(90, 58, 63, 0.5) !important;
+  border-color: rgba(141, 153, 174, 0.5) !important;
 }
 
 :root[data-theme='night'] input,
 :root[data-theme='night'] textarea,
 :root[data-theme='night'] select {
-  color: var(--color-brand-on-surface);
+  background-color: rgba(237, 242, 244, 0.08);
+  border-color: rgba(141, 153, 174, 0.5);
+  color: var(--platinum);
 }
 
 :root[data-theme='night'] input::placeholder,
 :root[data-theme='night'] textarea::placeholder {
-  color: rgba(247, 236, 236, 0.38);
+  color: rgba(237, 242, 244, 0.45);
 }
 
 :root[data-theme='night'] .bg-red-50,
 :root[data-theme='night'] .bg-brand-danger\/10 {
-  background-color: rgba(255, 155, 155, 0.12) !important;
-}
-
-:root[data-theme='night'] .text-red-700,
-:root[data-theme='night'] .text-brand-danger {
-  color: #ffb0b0 !important;
-}
-
-:root[data-theme='night'] .border-red-200,
-:root[data-theme='night'] .border-brand-danger\/20 {
-  border-color: rgba(255, 155, 155, 0.28) !important;
+  background-color: rgba(239, 35, 60, 0.15) !important;
 }
 
 .glass-morphism {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(24px);
+  border: 1px solid rgba(141, 153, 174, 0.35);
+  background: rgba(237, 242, 244, 0.18);
+  backdrop-filter: blur(18px);
 }
