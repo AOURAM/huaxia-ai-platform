@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import { OnboardingGate } from '@/app/guards/OnboardingGate';
 import { ProtectedRoute } from '@/app/guards/ProtectedRoute';
 import { AppLayout } from '@/app/layouts/AppLayout';
 import { PublicLayout } from '@/app/layouts/PublicLayout';
@@ -63,9 +64,11 @@ export function AppRouter() {
           path={ROUTES.home}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <HomeFeedPage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <HomeFeedPage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />
@@ -74,9 +77,11 @@ export function AppRouter() {
           path={ROUTES.cities}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <CitiesPage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <CitiesPage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />
@@ -85,9 +90,11 @@ export function AppRouter() {
           path={ROUTES.universities}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <UniversitiesPage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <UniversitiesPage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />
@@ -96,9 +103,11 @@ export function AppRouter() {
           path={ROUTES.culture}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <CulturePage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <CulturePage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />
@@ -107,9 +116,11 @@ export function AppRouter() {
           path={ROUTES.dailyLife}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <DailyLifePage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <DailyLifePage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />
@@ -118,9 +129,11 @@ export function AppRouter() {
           path={ROUTES.profile}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <ProfilePage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <ProfilePage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />
@@ -129,9 +142,11 @@ export function AppRouter() {
           path={ROUTES.settings}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <SettingsPage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <SettingsPage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />
@@ -140,9 +155,11 @@ export function AppRouter() {
           path={ROUTES.postDetail}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <PostDetailPage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <PostDetailPage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />
@@ -151,9 +168,11 @@ export function AppRouter() {
           path={ROUTES.postEdit}
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <EditPostPage />
-              </AppLayout>
+              <OnboardingGate>
+                <AppLayout>
+                  <EditPostPage />
+                </AppLayout>
+              </OnboardingGate>
             </ProtectedRoute>
           }
         />

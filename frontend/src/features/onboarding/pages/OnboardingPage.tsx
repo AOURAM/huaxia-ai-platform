@@ -15,10 +15,8 @@ import {
   Loader2,
   MapPin,
   MessageCircleQuestion,
-  Search,
   ShieldCheck,
   Smartphone,
-  Sparkles,
   UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
@@ -270,13 +268,8 @@ export function OnboardingPage() {
     'cities',
     'universities',
   ]);
-
-  const [locationQuery, setLocationQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<LocationOption | null>(null);
-
-  const [helpQuery, setHelpQuery] = useState('');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -290,52 +283,15 @@ export function OnboardingPage() {
     }[step];
   }, [step]);
 
-  const filteredLocations = useMemo(() => {
-    const query = locationQuery.trim().toLowerCase();
-
-    if (!query) {
-      return LOCATION_OPTIONS;
-    }
-
-    return LOCATION_OPTIONS.filter((item) => {
-      return (
-        item.label.toLowerCase().includes(query) ||
-        item.city.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query) ||
-        item.university?.toLowerCase().includes(query)
-      );
-    });
-  }, [locationQuery]);
-
-  const filteredHelpOptions = useMemo(() => {
-    const query = helpQuery.trim().toLowerCase();
-
-    if (!query) {
-      return HELP_OPTIONS;
-    }
-
-    return HELP_OPTIONS.filter((item) => {
-      return (
-        item.label.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query) ||
-        item.goal.toLowerCase().includes(query)
-      );
-    });
-  }, [helpQuery]);
-
   const toggleInterest = (id: string) => {
     setSelectedInterests((previous) =>
-      previous.includes(id)
-        ? previous.filter((item) => item !== id)
-        : [...previous, id],
+      previous.includes(id) ? previous.filter((item) => item !== id) : [...previous, id],
     );
   };
 
   const toggleGoal = (goal: string) => {
     setSelectedGoals((previous) =>
-      previous.includes(goal)
-        ? previous.filter((item) => item !== goal)
-        : [...previous, goal],
+      previous.includes(goal) ? previous.filter((item) => item !== goal) : [...previous, goal],
     );
   };
 
@@ -344,20 +300,14 @@ export function OnboardingPage() {
     setErrorMessage(null);
 
     try {
-      const customLocation = locationQuery.trim();
-      const customGoal = helpQuery.trim();
-
       await saveOnboarding({
         interests: skipped ? [] : selectedInterests,
-        city: skipped
-          ? null
-          : (selectedLocation?.city ?? customLocation) || null,
+        city: skipped ? null : selectedLocation?.city ?? null,
         university: skipped ? null : selectedLocation?.university ?? null,
-        goal: skipped
-          ? null
-          : selectedGoals.length > 0
-            ? selectedGoals.join(', ')
-            : customGoal || 'Find useful student life information',
+        goal:
+          skipped || selectedGoals.length === 0
+            ? null
+            : selectedGoals.join(', '),
         completed: true,
         skipped,
       });
@@ -369,9 +319,7 @@ export function OnboardingPage() {
 
       setStep('complete');
     } catch (error) {
-      setErrorMessage(
-        error instanceof ApiError ? error.message : 'Unable to save onboarding.',
-      );
+      setErrorMessage(error instanceof ApiError ? error.message : 'Unable to save onboarding.');
     } finally {
       setIsSaving(false);
     }
@@ -396,20 +344,6 @@ export function OnboardingPage() {
     }
 
     if (step === 'location') {
-      const customLocation = locationQuery.trim();
-
-      if (!selectedLocation && customLocation) {
-        setSelectedLocation({
-          id: `custom-${customLocation.toLowerCase().replace(/\s+/g, '-')}`,
-          label: customLocation,
-          type: 'city',
-          city: customLocation,
-          university: null,
-          description: 'Custom location',
-          icon: MapPin,
-        });
-      }
-
       setStep('help');
       return;
     }
@@ -446,74 +380,78 @@ export function OnboardingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-brand-neutral-soft px-6 py-10 text-brand-on-surface">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-screen overflow-hidden bg-brand-surface px-5 py-8 text-brand-on-surface md:px-8">
+      <div className="mx-auto flex max-w-6xl items-center justify-between">
+<div className="flex items-center">
+  <div>
+    <p className="text-2xl font-black tracking-[-0.05em] text-brand-on-surface">Huaxia</p>
+    <p className="text-sm font-semibold text-brand-on-surface/50">Onboarding Guide</p>
+  </div>
+</div>
+
+        {step !== 'complete' ? (
+          <button
+            type="button"
+            onClick={skipOnboarding}
+            disabled={isSaving}
+            className="rounded-full border border-brand-outline/60 bg-white/70 px-5 py-2 text-sm font-black text-brand-on-surface/60 transition hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Skip
+          </button>
+        ) : null}
+      </div>
+
+      <div className="mx-auto mt-10 max-w-6xl">
         {errorMessage ? (
-          <div className="mb-6">
+          <div className="mx-auto mb-6 max-w-3xl">
             <StatusBanner tone="error" message={errorMessage} />
           </div>
         ) : null}
 
-        <AnimatePresence mode="wait">
-          {step === 'welcome' ? (
-            <WelcomeStep
-              key="welcome"
-              onContinue={goNext}
-              onSkip={skipOnboarding}
-              isSaving={isSaving}
-            />
-          ) : null}
+        <StepShell narrow={step === 'complete'}>
+          <AnimatePresence mode="wait">
+            {step === 'welcome' ? (
+              <WelcomeStep onContinue={goNext} onSkip={skipOnboarding} isSaving={isSaving} />
+            ) : null}
 
-          {step === 'interests' ? (
-            <InterestsStep
-              key="interests"
-              active={stepIndex}
-              selected={selectedInterests}
-              onToggle={toggleInterest}
-              onBack={goBack}
-              onContinue={goNext}
-              isSaving={isSaving}
-            />
-          ) : null}
+            {step === 'interests' ? (
+              <InterestsStep
+                active={stepIndex}
+                selected={selectedInterests}
+                onToggle={toggleInterest}
+                onBack={goBack}
+                onContinue={goNext}
+                isSaving={isSaving}
+              />
+            ) : null}
 
-          {step === 'location' ? (
-            <LocationStep
-              key="location"
-              active={stepIndex}
-              query={locationQuery}
-              selectedLocation={selectedLocation}
-              locations={filteredLocations}
-              onQueryChange={(value) => {
-                setLocationQuery(value);
-                setSelectedLocation(null);
-              }}
-              onSelect={(location) => {
-                setSelectedLocation(location);
-                setLocationQuery(location.label);
-              }}
-              onBack={goBack}
-              onContinue={goNext}
-              isSaving={isSaving}
-            />
-          ) : null}
+            {step === 'location' ? (
+              <LocationStep
+                active={stepIndex}
+                selectedLocation={selectedLocation}
+                locations={LOCATION_OPTIONS}
+                onSelect={setSelectedLocation}
+                onBack={goBack}
+                onContinue={goNext}
+                isSaving={isSaving}
+              />
+            ) : null}
 
-          {step === 'help' ? (
-            <HelpStep
-              key="help"
-              active={stepIndex}
-              query={helpQuery}
-              selectedGoals={selectedGoals}
-              options={filteredHelpOptions}
-              onQueryChange={setHelpQuery}
-              onToggleGoal={toggleGoal}
-              onBack={goBack}
-              onContinue={goNext}
-              isSaving={isSaving}
-            />
-          ) : null}
+            {step === 'help' ? (
+              <HelpStep
+                active={stepIndex}
+                selectedGoals={selectedGoals}
+                options={HELP_OPTIONS}
+                onToggleGoal={toggleGoal}
+                onBack={goBack}
+                onContinue={goNext}
+                isSaving={isSaving}
+              />
+            ) : null}
 
-          {step === 'complete' ? <CompleteStep key="complete" onClose={finish} /> : null}
-        </AnimatePresence>
+            {step === 'complete' ? <CompleteStep onClose={finish} /> : null}
+          </AnimatePresence>
+        </StepShell>
       </div>
     </main>
   );
@@ -527,15 +465,14 @@ function StepShell({
   narrow?: boolean;
 }) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -18 }}
-      transition={{ duration: 0.25 }}
-      className={cn('mx-auto', narrow ? 'max-w-md' : 'max-w-5xl')}
+    <section
+      className={cn(
+        'mx-auto rounded-[2rem] border border-brand-outline/50 bg-white/75 p-6 shadow-xl shadow-brand-primary/5 backdrop-blur md:p-10',
+        narrow ? 'max-w-2xl' : 'max-w-5xl',
+      )}
     >
       {children}
-    </motion.section>
+    </section>
   );
 }
 
@@ -549,25 +486,34 @@ function ProgressHeader({
   align?: 'center' | 'split';
 }) {
   return (
-    <div className="mb-14">
+    <div
+      className={cn(
+        'mb-10 flex gap-4',
+        align === 'split'
+          ? 'items-center justify-between'
+          : 'flex-col items-center justify-center text-center',
+      )}
+    >
       {align === 'split' ? (
-        <div className="mb-8 flex items-center justify-between text-xs font-black uppercase tracking-[0.25em] text-brand-on-surface/35">
-          <span>Onboarding Guide</span>
-          <span className="text-brand-primary">Step {active} of 4</span>
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-primary">
+            Onboarding Guide
+          </p>
+          <p className="mt-1 text-sm font-bold text-brand-on-surface/45">Step {active} of 4</p>
         </div>
       ) : (
-        <p className="mb-8 text-center text-xs font-black uppercase tracking-[0.25em] text-brand-on-surface/45">
+        <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-primary">
           {label ?? `Step ${active} of 4`}
         </p>
       )}
 
-      <div className="mx-auto flex max-w-xs justify-center gap-3">
+      <div className="flex items-center gap-2">
         {[1, 2, 3, 4].map((item) => (
           <span
             key={item}
             className={cn(
-              'h-1.5 w-16 rounded-full transition',
-              item <= active ? 'bg-brand-primary' : 'bg-brand-outline',
+              'h-2 rounded-full transition-all',
+              item <= active ? 'w-8 bg-brand-primary' : 'w-2 bg-brand-outline/50',
             )}
           />
         ))}
@@ -586,57 +532,85 @@ function WelcomeStep({
   isSaving: boolean;
 }) {
   return (
-    <StepShell narrow>
-      <div className="rounded-3xl border border-brand-outline bg-white p-8 shadow-sm">
-        <ProgressHeader active={1} />
-
-        <div className="mb-8 rounded-2xl border border-brand-outline bg-brand-neutral-soft p-5">
-          <div className="mb-4 flex flex-wrap gap-2">
-            {['Cities', 'Universities', 'Culture', 'Daily Life'].map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-brand-outline bg-white px-3 py-1 text-xs font-black text-brand-on-surface/60"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-
-          <p className="text-sm font-bold leading-7 text-brand-on-surface/60">
-            Search real student discussions, ask practical questions, and find useful
-            answers about studying and living in China.
-          </p>
+    <motion.div
+      key="welcome"
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -24 }}
+      transition={{ duration: 0.35 }}
+      className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]"
+    >
+      <div>
+        <div className="mb-6 flex flex-wrap gap-2">
+          {['Cities', 'Universities', 'Culture', 'Daily Life'].map((item) => (
+            <span
+              key={item}
+              className="rounded-full border border-brand-outline/50 bg-brand-neutral-soft px-4 py-2 text-xs font-black text-brand-on-surface/60"
+            >
+              {item}
+            </span>
+          ))}
         </div>
 
-        <h1 className="font-serif text-4xl font-black leading-tight text-brand-on-surface">
+        <p className="mb-4 text-sm font-black uppercase tracking-[0.22em] text-brand-primary">
+          Search real student discussions, ask practical questions, and find useful answers about
+          studying and living in China.
+        </p>
+
+        <h1 className="text-5xl font-black leading-[0.96] tracking-[-0.055em] text-brand-on-surface md:text-7xl">
           Find trustworthy student knowledge faster
         </h1>
 
-        <p className="mt-6 text-base leading-8 text-brand-on-surface/55">
-          Huaxia helps international students in China find useful answers about
-          cities, universities, culture, and daily life.
+        <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-brand-on-surface/62">
+          Huaxia helps international students in China find useful answers about cities,
+          universities, culture, and daily life.
         </p>
 
-        <button
-          type="button"
-          onClick={onContinue}
-          className="mt-10 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-primary px-6 py-4 text-sm font-black text-white shadow-lg shadow-brand-primary/20 transition hover:bg-brand-primary-hover"
-        >
-          Get started
-          <ArrowRight className="h-5 w-5" />
-        </button>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={onContinue}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-primary px-6 py-4 text-base font-black text-[#EDF2F4] transition hover:bg-brand-primary-hover"
+          >
+            Get started
+            <ArrowRight size={18} />
+          </button>
 
-        <button
-          type="button"
-          onClick={onSkip}
-          disabled={isSaving}
-          className="mt-6 flex w-full items-center justify-center text-sm font-bold text-brand-on-surface/45 transition hover:text-brand-primary disabled:opacity-50"
-        >
-          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Skip for now
-        </button>
+          <button
+            type="button"
+            onClick={onSkip}
+            disabled={isSaving}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-brand-outline bg-white px-6 py-4 text-base font-black text-brand-on-surface transition hover:bg-brand-neutral-soft disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSaving ? <Loader2 className="animate-spin" size={18} /> : null}
+            Skip for now
+          </button>
+        </div>
       </div>
-    </StepShell>
+
+      <div className="relative min-h-[390px] overflow-hidden rounded-[2rem] bg-brand-on-surface p-6 text-[#EDF2F4]">
+        <div className="absolute right-[-100px] top-[-100px] h-72 w-72 rounded-full bg-brand-primary/35 blur-3xl" />
+        <div className="absolute bottom-[-110px] left-[-110px] h-72 w-72 rounded-full bg-[#EDF2F4]/10 blur-3xl" />
+
+        <div className="relative z-10 space-y-4">
+          {[
+            ['Daily Life', 'How do I open a bank account in China?'],
+            ['Universities', 'What documents do I need for registration?'],
+            ['Cities', 'Which city is cheaper for students?'],
+          ].map(([category, title]) => (
+            <div
+              key={title}
+              className="rounded-2xl border border-[#EDF2F4]/10 bg-[#EDF2F4]/[0.08] p-5"
+            >
+              <span className="rounded-full bg-brand-primary/25 px-3 py-1 text-xs font-black text-[#EDF2F4]">
+                {category}
+              </span>
+              <p className="mt-4 text-lg font-black leading-7 text-[#EDF2F4]">{title}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -656,21 +630,27 @@ function InterestsStep({
   isSaving: boolean;
 }) {
   return (
-    <StepShell>
-      <ProgressHeader active={active} />
+    <motion.div
+      key="interests"
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -30 }}
+      transition={{ duration: 0.35 }}
+    >
+      <ProgressHeader active={active} label="Step 2 of 4" />
 
-      <div className="text-center">
-        <h1 className="font-serif text-4xl font-black text-brand-on-surface">
+      <div className="mb-10 text-center">
+        <h1 className="text-4xl font-black tracking-[-0.04em] text-brand-on-surface md:text-5xl">
           What are you interested in?
         </h1>
 
-        <p className="mt-4 text-base text-brand-on-surface/55">
-          Select the topics that matter most to personalize your academic and cultural
-          journey in China.
+        <p className="mx-auto mt-4 max-w-2xl text-lg font-medium leading-8 text-brand-on-surface/62">
+          Select the topics that matter most to personalize your academic and cultural journey in
+          China.
         </p>
       </div>
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {INTERESTS.map((item) => {
           const isActive = selected.includes(item.id);
           const Icon = item.icon;
@@ -688,19 +668,19 @@ function InterestsStep({
               )}
             >
               {isActive ? (
-                <CheckCircle2 className="absolute right-4 top-4 h-5 w-5 text-brand-primary" />
+                <CheckCircle2
+                  className="absolute right-4 top-4 text-brand-primary"
+                  size={22}
+                />
               ) : null}
 
-              <Icon
-                className={cn(
-                  'mb-6 h-10 w-10',
-                  isActive ? 'text-brand-primary' : 'text-brand-on-surface/45',
-                )}
-              />
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-neutral-soft text-brand-primary">
+                <Icon size={24} />
+              </div>
 
-              <span className="font-serif text-xl font-black text-brand-on-surface">
+              <p className="text-xl font-black tracking-[-0.03em] text-brand-on-surface">
                 {item.label}
-              </span>
+              </p>
             </button>
           );
         })}
@@ -708,62 +688,53 @@ function InterestsStep({
 
       <FooterNav
         backLabel="Back"
-        nextLabel="Continue"
+        nextLabel="Next"
         onBack={onBack}
         onNext={onContinue}
         isSaving={isSaving}
       />
-    </StepShell>
+    </motion.div>
   );
 }
 
 function LocationStep({
   active,
-  query,
   selectedLocation,
   locations,
-  onQueryChange,
   onSelect,
   onBack,
   onContinue,
   isSaving,
 }: {
   active: number;
-  query: string;
   selectedLocation: LocationOption | null;
   locations: LocationOption[];
-  onQueryChange: (value: string) => void;
   onSelect: (location: LocationOption) => void;
   onBack: () => void;
   onContinue: () => void;
   isSaving: boolean;
 }) {
   return (
-    <StepShell>
-      <ProgressHeader active={active} />
+    <motion.div
+      key="location"
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -30 }}
+      transition={{ duration: 0.35 }}
+    >
+      <ProgressHeader active={active} label="Step 3 of 4" />
 
-      <div className="text-center">
-        <h1 className="font-serif text-4xl font-black text-brand-on-surface">
+      <div className="mb-10 text-center">
+        <h1 className="text-4xl font-black tracking-[-0.04em] text-brand-on-surface md:text-5xl">
           Where are you based?
         </h1>
 
-        <p className="mt-4 text-base text-brand-on-surface/55">
-          Search and select your city or university. You can also type your own city.
+        <p className="mx-auto mt-4 max-w-2xl text-lg font-medium leading-8 text-brand-on-surface/62">
+          Select your city or university so Huaxia can show more relevant student-life discussions.
         </p>
       </div>
 
-      <div className="relative mx-auto mt-12 max-w-3xl">
-        <Search className="absolute left-6 top-1/2 h-6 w-6 -translate-y-1/2 text-brand-on-surface/45" />
-
-        <input
-          value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Search city or university..."
-          className="w-full rounded-2xl border border-brand-outline bg-white py-5 pl-16 pr-6 text-lg shadow-sm outline-none transition placeholder:text-brand-on-surface/35 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5"
-        />
-      </div>
-
-      <div className="mt-8 grid gap-5 md:grid-cols-2">
+      <div className="grid max-h-[520px] gap-4 overflow-y-auto pr-1 sm:grid-cols-2">
         {locations.map((location) => {
           const Icon = location.icon;
           const isActive = selectedLocation?.id === location.id;
@@ -774,40 +745,34 @@ function LocationStep({
               type="button"
               onClick={() => onSelect(location)}
               className={cn(
-                'rounded-2xl border p-7 text-left transition',
+                'relative rounded-2xl border p-7 text-left transition',
                 isActive
                   ? 'border-brand-primary bg-brand-primary/10 shadow-md'
                   : 'border-brand-outline bg-white hover:border-brand-primary/50 hover:shadow-lg',
               )}
             >
-              <div className="mb-5 flex items-center justify-between gap-4">
-                <Icon className="h-10 w-10 text-brand-primary" />
-                {isActive ? <CheckCircle2 className="h-5 w-5 text-brand-primary" /> : null}
+              {isActive ? (
+                <CheckCircle2
+                  className="absolute right-4 top-4 text-brand-primary"
+                  size={22}
+                />
+              ) : null}
+
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-neutral-soft text-brand-primary">
+                <Icon size={24} />
               </div>
 
-              <h3 className="font-serif text-2xl font-black text-brand-on-surface">
+              <h3 className="text-xl font-black tracking-[-0.03em] text-brand-on-surface">
                 {location.label}
               </h3>
 
-              <p className="mt-2 text-sm font-bold text-brand-on-surface/45">
+              <p className="mt-2 text-sm font-semibold text-brand-on-surface/55">
                 {location.description}
               </p>
             </button>
           );
         })}
       </div>
-
-      {locations.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-brand-outline bg-white p-8 text-center">
-          <Compass className="mx-auto mb-4 h-8 w-8 text-brand-primary/60" />
-          <h3 className="font-serif text-xl font-black text-brand-on-surface">
-            No saved option found
-          </h3>
-          <p className="mt-2 text-sm text-brand-on-surface/55">
-            You can still continue with “{query.trim()}” as your custom city.
-          </p>
-        </div>
-      ) : null}
 
       <FooterNav
         backLabel="Back"
@@ -816,56 +781,49 @@ function LocationStep({
         onNext={onContinue}
         isSaving={isSaving}
       />
-    </StepShell>
+    </motion.div>
   );
 }
 
 function HelpStep({
   active,
-  query,
   selectedGoals,
   options,
-  onQueryChange,
   onToggleGoal,
   onBack,
   onContinue,
   isSaving,
 }: {
   active: number;
-  query: string;
   selectedGoals: string[];
   options: HelpOption[];
-  onQueryChange: (value: string) => void;
   onToggleGoal: (goal: string) => void;
   onBack: () => void;
   onContinue: () => void;
   isSaving: boolean;
 }) {
   return (
-    <StepShell>
-      <ProgressHeader active={active} align="split" />
+    <motion.div
+      key="help"
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -30 }}
+      transition={{ duration: 0.35 }}
+    >
+      <ProgressHeader active={active} label="Step 4 of 4" />
 
-      <h1 className="font-serif text-4xl font-black text-brand-on-surface">
-        How can we help today?
-      </h1>
+      <div className="mb-10 text-center">
+        <h1 className="text-4xl font-black tracking-[-0.04em] text-brand-on-surface md:text-5xl">
+          How can we help today?
+        </h1>
 
-      <p className="mt-4 text-base text-brand-on-surface/55">
-        Tell us what you are looking for, or choose one or more goals below.
-      </p>
-
-      <div className="relative mt-12">
-        <Search className="absolute left-6 top-1/2 h-6 w-6 -translate-y-1/2 text-brand-primary" />
-
-        <input
-          value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Search for answers or community posts..."
-          className="w-full rounded-2xl border border-brand-outline bg-white py-5 pl-16 pr-6 text-lg shadow-sm outline-none transition placeholder:text-brand-on-surface/35 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5"
-        />
+        <p className="mx-auto mt-4 max-w-2xl text-lg font-medium leading-8 text-brand-on-surface/62">
+          Choose one or more goals so Huaxia can guide your first experience.
+        </p>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <span className="text-sm font-black text-brand-on-surface/45">Popular:</span>
+      <div className="mb-8 flex flex-wrap justify-center gap-3">
+        <span className="py-2 text-sm font-black text-brand-on-surface/50">Popular:</span>
 
         {POPULAR_HELP.map((tag) => {
           const goal = `Find help about ${tag}`;
@@ -879,7 +837,7 @@ function HelpStep({
               className={cn(
                 'rounded-full border px-5 py-2 text-sm font-bold transition',
                 active
-                  ? 'border-brand-primary bg-brand-primary text-white'
+                  ? 'border-brand-primary bg-brand-primary text-[#EDF2F4]'
                   : 'border-brand-outline bg-white text-brand-on-surface/55 hover:border-brand-primary hover:text-brand-primary',
               )}
             >
@@ -889,15 +847,11 @@ function HelpStep({
         })}
       </div>
 
-      <div className="my-14 flex items-center gap-8">
-        <span className="h-px flex-1 bg-brand-outline" />
-        <span className="text-xs font-black uppercase tracking-[0.25em] text-brand-on-surface/40">
-          Or explore by
-        </span>
-        <span className="h-px flex-1 bg-brand-outline" />
-      </div>
+      <p className="mb-4 text-sm font-black uppercase tracking-[0.18em] text-brand-primary">
+        Or explore by
+      </p>
 
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {options.map((card) => {
           const Icon = card.icon;
           const active = selectedGoals.includes(card.goal);
@@ -914,51 +868,38 @@ function HelpStep({
                   : 'border-brand-outline bg-white hover:border-brand-primary/50 hover:shadow-lg',
               )}
             >
-              <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-brand-primary/5" />
-
-              <div className="relative mb-8 flex h-14 w-14 items-center justify-center rounded-xl bg-brand-neutral-soft text-brand-on-surface">
-                <Icon className="h-7 w-7" />
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-neutral-soft text-brand-primary">
+                <Icon size={24} />
               </div>
 
-              <h3 className="relative font-serif text-2xl font-black text-brand-on-surface">
+              <h3 className="text-xl font-black tracking-[-0.03em] text-brand-on-surface">
                 {card.label}
               </h3>
 
-              <p className="relative mt-4 text-sm leading-7 text-brand-on-surface/55">
+              <p className="mt-2 text-sm font-medium leading-6 text-brand-on-surface/60">
                 {card.description}
               </p>
 
               {active ? (
-                <CheckCircle2 className="absolute right-5 top-5 h-5 w-5 text-brand-primary" />
+                <CheckCircle2
+                  className="absolute right-4 top-4 text-brand-primary"
+                  size={22}
+                />
               ) : null}
             </button>
           );
         })}
       </div>
 
-      {options.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-brand-outline bg-white p-8 text-center">
-          <Sparkles className="mx-auto mb-4 h-8 w-8 text-brand-primary/60" />
-          <h3 className="font-serif text-xl font-black text-brand-on-surface">
-            No matching goal found
-          </h3>
-          <p className="mt-2 text-sm text-brand-on-surface/55">
-            You can still finish onboarding and save “{query.trim()}” as your goal.
-          </p>
-        </div>
-      ) : null}
-
       {selectedGoals.length > 0 ? (
-        <div className="mt-8 rounded-2xl border border-brand-outline bg-white p-5">
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-brand-on-surface/45">
-            Selected goals
-          </p>
+        <div className="mt-8 rounded-2xl border border-brand-primary/25 bg-brand-primary/10 p-5">
+          <p className="mb-3 text-sm font-black text-brand-primary">Selected goals</p>
 
           <div className="flex flex-wrap gap-2">
             {selectedGoals.map((goal) => (
               <span
                 key={goal}
-                className="rounded-full border border-brand-outline bg-brand-neutral-soft px-3 py-1.5 text-xs font-black text-brand-on-surface/65"
+                className="rounded-full bg-white px-3 py-2 text-xs font-black text-brand-on-surface/65"
               >
                 {goal}
               </span>
@@ -968,13 +909,13 @@ function HelpStep({
       ) : null}
 
       <FooterNav
-        backLabel="Previous Step"
+        backLabel="Back"
         nextLabel="Finish"
         onBack={onBack}
         onNext={onContinue}
         isSaving={isSaving}
       />
-    </StepShell>
+    </motion.div>
   );
 }
 
@@ -992,13 +933,14 @@ function FooterNav({
   isSaving: boolean;
 }) {
   return (
-    <div className="mt-16 flex items-center justify-between border-t border-brand-outline pt-8">
+    <div className="mt-10 flex items-center justify-between gap-4">
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm font-bold text-brand-on-surface/45 transition hover:text-brand-primary"
+        disabled={isSaving}
+        className="inline-flex items-center gap-2 rounded-2xl border border-brand-outline bg-white px-5 py-3 text-sm font-black text-brand-on-surface transition hover:bg-brand-neutral-soft disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <ArrowLeft className="h-5 w-5" />
+        <ArrowLeft size={17} />
         {backLabel}
       </button>
 
@@ -1006,11 +948,11 @@ function FooterNav({
         type="button"
         onClick={onNext}
         disabled={isSaving}
-        className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-8 py-4 text-sm font-black text-white shadow-lg shadow-brand-primary/20 transition hover:bg-brand-primary-hover disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-2xl bg-brand-primary px-6 py-3 text-sm font-black text-[#EDF2F4] transition hover:bg-brand-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
+        {isSaving ? <Loader2 className="animate-spin" size={17} /> : null}
         {nextLabel}
-        <ArrowRight className="h-5 w-5" />
+        {!isSaving ? <ArrowRight size={17} /> : null}
       </button>
     </div>
   );
@@ -1018,26 +960,34 @@ function FooterNav({
 
 function CompleteStep({ onClose }: { onClose: () => void }) {
   return (
-    <StepShell narrow>
-      <div className="rounded-3xl border border-brand-outline bg-white p-10 text-center shadow-sm">
-        <CheckCircle2 className="mx-auto mb-6 h-16 w-16 text-brand-primary" />
-
-        <h2 className="font-serif text-3xl font-black text-brand-on-surface">
-          Registration Complete!
-        </h2>
-
-        <p className="mt-4 text-sm leading-7 text-brand-on-surface/55">
-          Thank you for joining Huaxia. Your onboarding choices have been saved.
-        </p>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-8 rounded-xl bg-brand-primary px-8 py-4 text-sm font-black text-white shadow-lg shadow-brand-primary/20 transition hover:bg-brand-primary-hover"
-        >
-          Go to feed
-        </button>
+    <motion.div
+      key="complete"
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.35 }}
+      className="text-center"
+    >
+      <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-primary text-[#EDF2F4]">
+        <CheckCircle2 size={34} />
       </div>
-    </StepShell>
+
+      <h2 className="text-4xl font-black tracking-[-0.04em] text-brand-on-surface">
+        Registration Complete!
+      </h2>
+
+      <p className="mx-auto mt-4 max-w-xl text-lg font-medium leading-8 text-brand-on-surface/62">
+        Thank you for joining Huaxia. Your onboarding choices have been saved.
+      </p>
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="mt-8 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-primary px-6 py-4 text-base font-black text-[#EDF2F4] transition hover:bg-brand-primary-hover"
+      >
+        Go to feed
+        <ArrowRight size={18} />
+      </button>
+    </motion.div>
   );
 }

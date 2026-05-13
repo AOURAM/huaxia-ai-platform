@@ -39,8 +39,10 @@ export function LoginForm() {
   const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
     const { clientX, clientY, currentTarget } = event;
     const rect = currentTarget.getBoundingClientRect();
+
     const x = (clientX - rect.left) / rect.width - 0.5;
     const y = (clientY - rect.top) / rect.height - 0.5;
+
     mouseX.set(x);
     mouseY.set(y);
   };
@@ -72,20 +74,28 @@ export function LoginForm() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="z-10 flex w-full items-center justify-center p-8 lg:w-1/2"
       >
-        <div className="w-full max-w-[400px] space-y-8">
+        <div className="w-full max-w-[430px] space-y-8">
           <div className="mb-2 flex items-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary text-[#EDF2F4]">
               <Sparkles size={24} />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-brand-primary">Huaxia</h2>
+
+            <h2 className="text-2xl font-black tracking-[-0.04em] text-brand-on-surface">
+              Huaxia
+            </h2>
           </div>
 
-          <div className="space-y-2 text-center lg:text-left">
-            <h1 className="font-serif text-4xl tracking-tight text-brand-on-surface lg:text-5xl">
-              Welcome
+          <div className="space-y-3 text-center lg:text-left">
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-brand-primary">
+              Welcome back
+            </p>
+
+            <h1 className="text-5xl font-black tracking-[-0.06em] text-brand-on-surface">
+              Sign in
             </h1>
-            <p className="text-lg text-brand-on-surface/60">
-              Access your account and continue your journey with us
+
+            <p className="max-w-md text-lg font-medium leading-8 text-brand-on-surface/60">
+              Access your account and continue exploring student-life discussions in China.
             </p>
           </div>
 
@@ -116,14 +126,14 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword((previous) => !previous)}
-                className="absolute right-4 top-[38px] text-brand-on-surface/40 transition-colors hover:text-brand-primary"
+                className="absolute right-4 top-[38px] text-brand-on-surface/45 transition-colors hover:text-brand-primary"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
 
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between gap-4 text-sm">
               <label className="group flex cursor-pointer items-center gap-2">
                 <input
                   checked={remember}
@@ -131,12 +141,18 @@ export function LoginForm() {
                   type="checkbox"
                   className="rounded border-brand-outline text-brand-primary focus:ring-brand-primary"
                 />
-                <span className="text-brand-on-surface/70 transition-colors group-hover:text-brand-on-surface">
+
+                <span className="font-medium text-brand-on-surface/70 transition-colors group-hover:text-brand-on-surface">
                   Keep me signed in
                 </span>
               </label>
 
-              <span className="font-semibold text-brand-primary/70">Reset password</span>
+              <button
+                type="button"
+                className="font-bold text-brand-primary transition hover:text-brand-primary-hover"
+              >
+                Reset password
+              </button>
             </div>
 
             <motion.button
@@ -144,11 +160,12 @@ export function LoginForm() {
               disabled={status === 'loading'}
               animate={status === 'error' ? { x: [0, -10, 10, -10, 10, 0] } : undefined}
               className={cn(
-                'flex w-full items-center justify-center gap-3 rounded-xl py-4 text-lg font-semibold transition-all duration-300',
-                status === 'idle' && 'bg-brand-primary text-white hover:bg-brand-primary-hover',
-                status === 'loading' && 'cursor-wait bg-brand-primary/80 text-white',
-                status === 'success' && 'bg-brand-success text-white shadow-lg',
-                status === 'error' && 'bg-brand-danger text-white shadow-lg',
+                'flex w-full items-center justify-center gap-3 rounded-xl py-4 text-lg font-black transition-all duration-300',
+                status === 'idle' &&
+                  'bg-brand-primary text-[#EDF2F4] shadow-lg shadow-brand-primary/20 hover:bg-brand-primary-hover',
+                status === 'loading' && 'cursor-wait bg-brand-primary/80 text-[#EDF2F4]',
+                status === 'success' && 'bg-brand-success text-[#EDF2F4] shadow-lg',
+                status === 'error' && 'bg-brand-danger text-[#EDF2F4] shadow-lg',
               )}
             >
               <AnimatePresence mode="wait">
@@ -201,11 +218,11 @@ export function LoginForm() {
             </motion.button>
           </form>
 
-          <p className="text-center text-brand-on-surface/60">
-            New to our platform?{' '}
+          <p className="text-center font-medium text-brand-on-surface/60">
+            New to Huaxia?{' '}
             <Link
               to={ROUTES.register}
-              className="font-bold text-brand-primary/70 transition-colors hover:text-brand-primary"
+              className="font-black text-brand-primary transition-colors hover:text-brand-primary-hover"
             >
               Create Account
             </Link>
@@ -219,38 +236,46 @@ export function LoginForm() {
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         className="hidden h-screen p-6 lg:block lg:w-1/2"
       >
-        <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] shadow-2xl">
+        <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] border border-brand-outline/40 bg-brand-on-surface shadow-2xl">
           <motion.img
             src={signInBg}
-            alt="Chinese garden scenery"
-            style={{ x: backgroundX, y: backgroundY, scale: 1.08 }}
+            alt="Chinese architecture background"
+            style={{
+              x: backgroundX,
+              y: backgroundY,
+              scale: 1.08,
+            }}
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-on-surface/20 via-brand-on-surface/10 to-brand-primary/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-on-surface/45 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#2B2D42]/35 via-[#2B2D42]/10 to-[#EF233C]/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2B2D42]/65 via-[#2B2D42]/10 to-transparent" />
+
+          <div className="absolute left-8 top-8 rounded-full border border-[#EDF2F4]/20 bg-[#EDF2F4]/15 px-4 py-2 text-sm font-black text-[#EDF2F4] backdrop-blur-xl">
+            Huaxia community
+          </div>
 
           <motion.div
             style={{ x: cardX, y: cardY }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.8 }}
-            className="glass-morphism absolute bottom-12 right-12 max-w-[340px] rounded-2xl p-6"
+            className="absolute bottom-12 right-12 max-w-[360px] rounded-3xl border border-[#EDF2F4]/20 bg-[#EDF2F4]/15 p-6 text-[#EDF2F4] shadow-2xl backdrop-blur-xl"
           >
             <div className="mb-4 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-brand-primary text-sm font-bold text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#EDF2F4]/20 bg-brand-primary text-sm font-black text-[#EDF2F4]">
                 SC
               </div>
 
               <div>
-                <h4 className="text-base font-bold text-white">Sarah Chen</h4>
-                <p className="text-xs text-white/60">@sarahdigital</p>
+                <h4 className="text-base font-black text-[#EDF2F4]">Sarah Chen</h4>
+                <p className="text-xs font-semibold text-[#EDF2F4]/60">@sarahdigital</p>
               </div>
             </div>
 
-            <p className="font-serif text-sm italic leading-relaxed text-white/90">
-              "Amazing platform! The user experience is seamless and the features are exactly what I
-              needed for my cultural research projects."
+            <p className="text-sm font-semibold italic leading-7 text-[#EDF2F4]/88">
+              “Huaxia helps me find student-life answers faster instead of searching through
+              scattered group chats.”
             </p>
           </motion.div>
         </div>

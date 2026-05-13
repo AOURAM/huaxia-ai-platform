@@ -118,17 +118,19 @@ export function RegisterForm() {
         animate="visible"
         variants={containerVariants}
         >
-        <motion.div variants={itemVariants} className="mb-12">
-            <p className="mb-8 font-serif text-2xl font-semibold text-brand-primary">Huaxia</p>
+<motion.div variants={itemVariants} className="mb-12 space-y-3">
+  <p className="text-sm font-black uppercase tracking-[0.22em] text-brand-primary">
+    Create account
+  </p>
 
-            <h1 className="mb-3 font-serif text-[40px] leading-tight text-brand-on-surface">
-            Create Your Account
-            </h1>
+  <h1 className="text-5xl font-black tracking-[-0.06em] text-brand-on-surface">
+    Join Huaxia
+  </h1>
 
-            <p className="max-w-md text-lg text-brand-on-surface/70">
-            Join the Huaxia community to share experiences, ask questions, and discover student life in China.
-            </p>
-        </motion.div>
+  <p className="max-w-md text-lg font-medium leading-8 text-brand-on-surface/60">
+    Create your account to share experiences, ask questions, and discover student life in China.
+  </p>
+</motion.div>
 
         <motion.form
             variants={itemVariants}
@@ -181,13 +183,14 @@ export function RegisterForm() {
             type="submit"
             disabled={status === 'loading'}
             animate={status === 'error' ? { x: [0, -8, 8, -8, 8, 0] } : undefined}
-            className={cn(
-                'flex w-full items-center justify-center gap-2 rounded-xl py-4 text-lg font-semibold transition-all duration-300',
-                status === 'idle' && 'bg-brand-primary text-white hover:bg-brand-primary-hover',
-                status === 'loading' && 'cursor-wait bg-brand-primary/85 text-white',
-                status === 'success' && 'bg-brand-success text-white',
-                status === 'error' && 'bg-brand-danger text-white',
-            )}
+className={cn(
+  'flex w-full items-center justify-center gap-2 rounded-xl py-4 text-lg font-black transition-all duration-300',
+  status === 'idle' &&
+    'bg-brand-primary text-[#EDF2F4] shadow-lg shadow-brand-primary/20 hover:bg-brand-primary-hover',
+  status === 'loading' && 'cursor-wait bg-brand-primary/85 text-[#EDF2F4]',
+  status === 'success' && 'bg-brand-success text-[#EDF2F4]',
+  status === 'error' && 'bg-brand-danger text-[#EDF2F4]',
+)}
             >
             <AnimatePresence mode="wait">
                 {status === 'idle' && (
