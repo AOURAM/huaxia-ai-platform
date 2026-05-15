@@ -29,7 +29,7 @@ from app.services.post_enrichment_service import enrich_post_ai
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
-MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+MAX_IMAGE_SIZE_BYTES = 12 * 1024 * 1024
 
 ALLOWED_IMAGE_CONTENT_TYPES = {
     "image/jpeg",
@@ -104,6 +104,7 @@ def detect_image_extension(file_bytes: bytes) -> str | None:
 
     return None
 
+
 def save_uploaded_image(image: UploadFile | None) -> str | None:
     if image is None:
         return None
@@ -117,7 +118,7 @@ def save_uploaded_image(image: UploadFile | None) -> str | None:
             detail="Invalid image file extension. Allowed: jpg, jpeg, png, webp, gif.",
         )
 
-    if image.content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
+    if image.content_type and image.content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
         raise HTTPException(
             status_code=400,
             detail="Invalid image content type. Allowed: jpeg, png, webp, gif.",
@@ -131,7 +132,7 @@ def save_uploaded_image(image: UploadFile | None) -> str | None:
     if len(file_bytes) > MAX_IMAGE_SIZE_BYTES:
         raise HTTPException(
             status_code=400,
-            detail="Image is too large. Maximum allowed size is 5MB.",
+            detail="Image is too large. Maximum allowed size is 12MB.",
         )
 
     detected_extension = detect_image_extension(file_bytes)
