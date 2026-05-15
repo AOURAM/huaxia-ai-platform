@@ -70,16 +70,20 @@ export function PostDetailPage() {
   const authorUser = isCurrentUserAuthor ? displayUser : null;
   const authorName = authorUser?.username ?? `User #${post?.user_id ?? ''}`;
 
-  const contentParagraphs = useMemo(() => {
-    if (!post?.content) {
-      return [];
-    }
+const contentParagraphs = useMemo(() => {
+  if (!post?.content) {
+    return [];
+  }
 
-    return post.content
-      .split(/\n+/)
-      .map((paragraph) => paragraph.trim())
-      .filter(Boolean);
-  }, [post?.content]);
+  return post.content
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => {
+      if (!paragraph) return false;
+
+      return !/^(page_name|content_type|category|category_id|tags)\s*:/i.test(paragraph);
+    });
+}, [post?.content]);
 
   const safeTags = Array.isArray(post?.tags) ? post.tags : [];
 
@@ -175,12 +179,13 @@ export function PostDetailPage() {
               </h1>
 
               <div className="mt-8 flex items-center gap-4">
-                <LocalUserAvatar
-                  user={authorUser}
-                  userId={post.user_id}
-                  username={authorName}
-                  size="md"
-                />
+<LocalUserAvatar
+  user={authorUser}
+  userId={post.user_id}
+  username={authorUser?.username ?? null}
+  avatarStyle={authorUser ? undefined : 'initials'}
+  size="lg"
+/>
 
                 <div>
                   <p className="font-bold text-brand-on-surface">{authorName}</p>
@@ -226,18 +231,18 @@ export function PostDetailPage() {
                 )}
               </div>
 
-              {safeTags.length > 0 ? (
-                <div className="mt-8 flex flex-wrap gap-2">
-                  {safeTags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-brand-neutral-soft px-3 py-1.5 text-xs font-bold text-brand-on-surface/60"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
+{safeTags.length > 0 ? (
+  <div className="mt-8 flex flex-wrap gap-2">
+    {safeTags.map((tag) => (
+      <span
+        key={tag}
+        className="inline-flex items-center rounded-full bg-brand-neutral-soft px-3 py-1.5 text-xs font-black text-brand-on-surface/50"
+      >
+        #{tag}
+      </span>
+    ))}
+  </div>
+) : null}
 
               <div className="mt-10 flex flex-wrap gap-3 border-t border-brand-outline pt-6">
                 <button

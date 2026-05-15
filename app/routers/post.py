@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -715,9 +716,15 @@ def update_post(
                 detail="content_type must be one of: question, guide, experience, news, tip",
             )
 
+    # Do not block editing old city posts just because city_id is missing.
+    # Users should not type database IDs in the frontend.
     if final_page_name == "cities":
-        final_city_id = city_id if city_id is not None else post.city_id
-        post.city_id = validate_city_for_post(final_page_name, final_city_id, db)
+        if city_id is not None:
+            post.city_id = validate_city_for_post(final_page_name, city_id, db)
+        elif post.city_id is not None:
+            post.city_id = validate_city_for_post(final_page_name, post.city_id, db)
+        else:
+            post.city_id = None
     else:
         post.city_id = None
 
@@ -753,7 +760,6 @@ def update_post(
 
     if title is not None or content_changed:
         update_search_vector(db, post.id)
-
         db.commit()
         db.refresh(post)
 

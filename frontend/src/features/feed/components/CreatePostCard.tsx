@@ -78,7 +78,7 @@ export function CreatePostCard({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-3xl border border-brand-outline bg-white p-6 shadow-sm"
+      className="create-post-card rounded-3xl border border-brand-outline/70 bg-brand-surface p-6 shadow-none"
     >
       <div className="flex gap-4">
         <LocalUserAvatar user={displayUser} size="sm" />
@@ -88,7 +88,7 @@ export function CreatePostCard({
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Share an insight, question, or student experience..."
-            className="mb-3 w-full border-0 bg-transparent text-sm outline-none placeholder:text-brand-on-surface/45"
+            className="mb-3 w-full border-0 bg-transparent text-sm shadow-none outline-none ring-0 placeholder:text-brand-on-surface/45 focus:shadow-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
           />
 
           <textarea
@@ -96,7 +96,7 @@ export function CreatePostCard({
             onChange={(event) => setContent(event.target.value)}
             placeholder="Write the details here..."
             rows={3}
-            className="w-full resize-none border-0 bg-transparent text-sm leading-relaxed outline-none placeholder:text-brand-on-surface/35"
+            className="w-full resize-none border-0 bg-transparent text-sm leading-relaxed shadow-none outline-none ring-0 placeholder:text-brand-on-surface/35 focus:shadow-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
           />
 
           <div className="mt-4 border-t border-brand-outline/50 pt-4">
@@ -104,7 +104,7 @@ export function CreatePostCard({
               <select
                 value={contentType}
                 onChange={(event) => setContentType(event.target.value as ContentType)}
-                className="rounded-xl border border-brand-outline bg-brand-neutral-soft px-4 py-2.5 text-xs font-bold text-brand-on-surface/70 outline-none focus:border-brand-primary"
+                className="rounded-xl border border-brand-outline bg-brand-neutral-soft px-4 py-2.5 text-xs font-bold text-brand-on-surface/70 shadow-none outline-none ring-0 focus:border-brand-primary focus:shadow-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 <option value="experience">Experience</option>
                 <option value="question">Question</option>

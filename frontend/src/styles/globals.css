@@ -293,3 +293,50 @@ select:focus {
   background: rgba(237, 242, 244, 0.18);
   backdrop-filter: blur(18px);
 }
+/* Create post composer: override global form focus styles only here */
+.create-post-card input,
+.create-post-card textarea,
+.create-post-card select {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.create-post-card input:focus,
+.create-post-card textarea:focus,
+.create-post-card select:focus,
+.create-post-card input:focus-visible,
+.create-post-card textarea:focus-visible,
+.create-post-card select:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.create-post-card input,
+.create-post-card textarea {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.create-post-card select {
+  box-shadow: none !important;
+  outline: none !important;
+}
+/* Search bars: remove ugly global focus outline/background */
+input[placeholder^='Search'],
+input[placeholder^='Search']:focus,
+input[placeholder^='Search']:focus-visible {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Keep search bars clean in night mode too */
+:root[data-theme='night'] input[placeholder^='Search'],
+:root[data-theme='night'] input[placeholder^='Search']:focus,
+:root[data-theme='night'] input[placeholder^='Search']:focus-visible {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}

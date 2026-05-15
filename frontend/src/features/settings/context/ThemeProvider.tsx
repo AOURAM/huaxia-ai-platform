@@ -7,10 +7,13 @@ import {
   type PropsWithChildren,
 } from 'react';
 
+import { useAuth } from '@/features/auth/hooks/useAuth';
+
 export type AppearanceMode = 'light' | 'night';
 
 interface ThemeContextValue {
   appearance: AppearanceMode;
+  effectiveAppearance: AppearanceMode;
   isNightMode: boolean;
   setAppearance: (appearance: AppearanceMode) => void;
   toggleAppearance: () => void;
@@ -35,7 +38,14 @@ function readStoredAppearance(): AppearanceMode {
 }
 
 export function ThemeProvider({ children }: PropsWithChildren) {
+  const { isAuthenticated } = useAuth();
   const [appearance, setAppearanceState] = useState<AppearanceMode>(readStoredAppearance);
+
+  /*
+    Store the user's preference, but do not force public pages
+    like login/register/landing to use night mode.
+  */
+  const effectiveAppearance: AppearanceMode = isAuthenticated ? appearance : 'light';
 
   const setAppearance = (nextAppearance: AppearanceMode) => {
     setAppearanceState(nextAppearance);
@@ -52,18 +62,19 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     const root = document.documentElement;
 
-    root.dataset.theme = appearance;
-    root.style.colorScheme = appearance === 'night' ? 'dark' : 'light';
-  }, [appearance]);
+    root.dataset.theme = effectiveAppearance;
+    root.style.colorScheme = effectiveAppearance === 'night' ? 'dark' : 'light';
+  }, [effectiveAppearance]);
 
-  const value = useMemo<ThemeContextValue>(
+  const value = useMemo(
     () => ({
       appearance,
-      isNightMode: appearance === 'night',
+      effectiveAppearance,
+      isNightMode: effectiveAppearance === 'night',
       setAppearance,
       toggleAppearance,
     }),
-    [appearance],
+    [appearance, effectiveAppearance],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
