@@ -20,6 +20,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
 import { ROUTES } from '@/constants/routes';
+import { section } from 'motion/react-m';
 
 const sections = [
   {
@@ -550,50 +551,57 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="workflow" className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-        <div className="mb-10 text-center">
-          <p className="text-sm font-black uppercase tracking-[0.24em] text-brand-primary">
-            Community workflow
-          </p>
-          <h2 className="mx-auto mt-3 max-w-3xl text-4xl font-black tracking-[-0.04em] md:text-5xl">
-            A living forum, not a dead landing page.
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg font-medium leading-8 text-brand-on-surface/62">
-            The landing page now shows the actual product loop: students post, AI organizes, search
-            brings useful answers back.
-          </p>
-        </div>
+<section id="workflow" className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
+  <div className="mb-10 text-center">
+    <p className="text-sm font-black uppercase tracking-[0.24em] text-brand-primary">
+      How Huaxia works
+    </p>
 
-        <div className="grid gap-5 md:grid-cols-3">
-          {workflow.map((step, index) => {
-            const Icon = step.icon;
+    <h2 className="mx-auto mt-3 max-w-3xl text-4xl font-black tracking-[-0.04em] md:text-5xl">
+      From student questions to searchable knowledge.
+    </h2>
 
-            return (
-              <motion.div
-                key={step.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ duration: 0.45, delay: index * 0.1 }}
-                className="rounded-[1.7rem] border border-brand-outline/50 bg-white/70 p-6 shadow-sm"
-              >
-                <div className="mb-6 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-neutral-soft text-brand-primary">
-                    <Icon size={24} />
-                  </div>
-                  <span className="text-sm font-black text-brand-on-surface/30">
-                    0{index + 1}
-                  </span>
-                </div>
-                <h3 className="text-2xl font-black tracking-[-0.03em]">{step.title}</h3>
-                <p className="mt-3 text-sm font-medium leading-6 text-brand-on-surface/62">
-                  {step.description}
-                </p>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
+    <p className="mx-auto mt-4 max-w-2xl text-lg font-medium leading-8 text-brand-on-surface/62">
+      Huaxia turns everyday student discussions into organized, searchable posts that help
+      international students solve real problems faster.
+    </p>
+  </div>
+
+  <div className="grid gap-5 md:grid-cols-3">
+    {workflow.map((step, index) => {
+      const Icon = step.icon;
+
+      return (
+        <motion.div
+          key={step.title}
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.45, delay: index * 0.1 }}
+          className="rounded-[1.7rem] border border-brand-outline/50 bg-white/70 p-6 shadow-sm"
+        >
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-neutral-soft text-brand-primary">
+              <Icon size={24} />
+            </div>
+
+            <span className="text-sm font-black text-brand-on-surface/30">
+              0{index + 1}
+            </span>
+          </div>
+
+          <h3 className="text-2xl font-black tracking-[-0.03em] text-brand-on-surface">
+            {step.title}
+          </h3>
+
+          <p className="mt-3 text-sm font-medium leading-6 text-brand-on-surface/62">
+            {step.description}
+          </p>
+        </motion.div>
+      );
+    })}
+  </div>
+</section>
 
       <section id="community" className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -675,13 +683,13 @@ export function LandingPage() {
               ))}
             </div>
 
-            <Link
-              to={ROUTES.register}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-primary px-5 py-4 text-sm font-black text-[#EDF2F4] transition hover:bg-brand-primary-hover"
-            >
-              Join the discussion
-              <ArrowRight size={17} />
-            </Link>
+<Link
+  to={ROUTES.register}
+  className="inline-flex min-w-[180px] items-center justify-center gap-2 rounded-2xl bg-[#EDF2F4] px-6 py-4 text-base font-black text-[#2B2D42] shadow-sm transition hover:bg-[#EDF2F4]/90"
+>
+  Create account
+  <ArrowRight size={18} className="text-[#2B2D42]" />
+</Link>
           </div>
         </div>
       </section>
@@ -706,17 +714,17 @@ export function LandingPage() {
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
               <Link
                 to={ROUTES.register}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#EDF2F4] px-6 py-4 text-base font-black text-[#2B2D42] transition hover:bg-[#EDF2F4]/90"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#EF233C] px-6 py-4 text-base font-black text-[#EDF2F4] transition hover:bg-[#D90429]"
               >
                 Create account
                 <ArrowRight size={18} />
               </Link>
-              <Link
-                to={ROUTES.login}
-                className="inline-flex items-center justify-center rounded-2xl border border-[#EDF2F4]/20 px-6 py-4 text-base font-black text-[#EDF2F4] transition hover:bg-[#EDF2F4]/10"
-              >
-                Sign in
-              </Link>
+<Link
+  to={ROUTES.login}
+  className="inline-flex min-w-[180px] items-center justify-center rounded-2xl border border-[#EDF2F4]/20 px-6 py-4 text-base font-black text-[#EDF2F4] transition hover:bg-[#EDF2F4]/10"
+>
+  Sign in
+</Link>
             </div>
           </div>
         </div>

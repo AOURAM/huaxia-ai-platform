@@ -310,33 +310,12 @@ className={cn(
               “Huaxia helped me find real advice from other international students before I arrived in China. I stopped guessing and started planning.”
             </p>
 
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                {avatarFailed ? (
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full border border-brand-outline bg-brand-neutral-soft font-semibold text-brand-primary">
-                    AR
-                  </div>
-                ) : (
-                  <img
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=240&auto=format&fit=crop"
-                    alt="Amina Rahman"
-                    className="h-14 w-14 rounded-full border border-brand-outline object-cover"
-                    onError={() => setAvatarFailed(true)}
-                  />
-                )}
-
-                <div className="absolute -bottom-1 -right-1 rounded-full border-2 border-brand-surface bg-brand-primary p-1 text-white">
-                  <CheckCircle2 className="h-3 w-3" />
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xl font-semibold text-brand-on-surface">Amina Rahman</p>
-                <p className="text-base text-brand-on-surface/65">
-                  International Student · Wuhan
-                </p>
-              </div>
-            </div>
+<div className="border-t border-brand-outline/40 pt-6">
+  <p className="text-xl font-black text-brand-on-surface">Rami</p>
+  <p className="mt-1 text-base font-medium text-brand-on-surface/65">
+    International Student · Wuhan
+  </p>
+</div>
           </motion.div>
         </div>
       </div>
