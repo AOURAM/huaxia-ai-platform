@@ -32,7 +32,6 @@ export function RegisterForm() {
 
     const [status, setStatus] = useState<SubmitStatus>('idle');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [avatarFailed, setAvatarFailed] = useState(false);
 
     const containerVariants = {
     hidden: { opacity: 0 },
@@ -298,25 +297,26 @@ className={cn(
             }}
           />
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94, y: 28 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.45 }}
-            className="relative z-10 mx-10 max-w-xl rounded-[1.75rem] border border-white/10 bg-brand-surface/95 p-10 shadow-2xl backdrop-blur-xl"
-          >
-            <Quote className="mb-6 h-12 w-12 text-brand-primary/80" />
+<motion.div
+  initial={{ opacity: 0, scale: 0.94, y: 28 }}
+  animate={{ opacity: 1, scale: 1, y: 0 }}
+  transition={{ duration: 0.8, delay: 0.45 }}
+  className="relative z-10 mx-10 max-w-xl rounded-[1.75rem] border border-[#EDF2F4]/15 bg-[#EDF2F4]/95 p-10 shadow-2xl backdrop-blur-xl"
+>
+  <Quote className="mb-6 h-12 w-12 text-brand-primary" />
 
-            <p className="mb-8 font-serif text-[2rem] leading-[1.45] text-brand-on-surface">
-              “Huaxia helped me find real advice from other international students before I arrived in China. I stopped guessing and started planning.”
-            </p>
-
-<div className="border-t border-brand-outline/40 pt-6">
-  <p className="text-xl font-black text-brand-on-surface">Rami</p>
-  <p className="mt-1 text-base font-medium text-brand-on-surface/65">
-    International Student · Wuhan
+  <p className="mb-8 text-[2rem] font-medium leading-[1.45] tracking-[-0.04em] text-brand-on-surface">
+    “Huaxia helped me find real advice from other international students before I arrived in
+    China. I stopped guessing and started planning.”
   </p>
-</div>
-          </motion.div>
+
+  <div className="border-t border-brand-outline/40 pt-6">
+    <p className="text-xl font-black text-brand-on-surface">Rami</p>
+    <p className="mt-1 text-base font-medium text-brand-on-surface/65">
+      International Student · Wuhan
+    </p>
+  </div>
+</motion.div>
         </div>
       </div>
     </div>
