@@ -109,19 +109,22 @@ export function HomeFeedPage() {
             </div>
           ) : null}
 
-          {searchResults ? (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-primary/20 bg-brand-primary/5 p-4 text-sm font-bold text-brand-primary">
-              <span>Showing search results for “{query}”.</span>
+{searchResults ? (
+  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-outline bg-brand-neutral-soft p-4 text-sm font-bold text-brand-on-surface/70">
+    <span>
+      Showing search results for{' '}
+      <span className="text-brand-on-surface">“{query}”</span>.
+    </span>
 
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="rounded-lg border border-brand-primary/20 px-3 py-1 text-xs uppercase tracking-wider transition hover:bg-brand-primary/10"
-              >
-                Clear
-              </button>
-            </div>
-          ) : null}
+    <button
+      type="button"
+      onClick={clearSearch}
+      className="rounded-lg border border-brand-outline bg-white px-3 py-1 text-xs uppercase tracking-wider text-brand-on-surface/70 transition hover:bg-brand-neutral-soft hover:text-brand-on-surface"
+    >
+      Clear
+    </button>
+  </div>
+) : null}
         </motion.section>
 
         <CreatePostCard />

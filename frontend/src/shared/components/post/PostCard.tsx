@@ -53,7 +53,7 @@ export function PostCard({ post }: PostCardProps) {
     setAvatarFailed(false);
   }, [authorAvatarUrl]);
 
-  const authorLabel = isOwner && user?.username ? user.username : `User #${post.user_id}`;
+const authorLabel = isOwner && user?.username ? user.username : 'Student Member';
   const authorInitials =
     isOwner && user?.username ? getInitials(user.username) : `U${post.user_id}`;
 

@@ -8,8 +8,8 @@ ALLOWED_EVENT_TAGS = {
     "workshop",
     "food",
     "music",
-    "language",
     "campus",
+    "language",
     "community",
     "other",
 }

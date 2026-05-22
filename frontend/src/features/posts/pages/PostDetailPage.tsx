@@ -68,7 +68,7 @@ export function PostDetailPage() {
   );
 
   const authorUser = isCurrentUserAuthor ? displayUser : null;
-  const authorName = authorUser?.username ?? `User #${post?.user_id ?? ''}`;
+  const authorName = authorUser?.username ?? 'Student Member';
 
 const contentParagraphs = useMemo(() => {
   if (!post?.content) {

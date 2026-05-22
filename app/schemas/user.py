@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.core.avatar import ALLOWED_AVATAR_STYLES
 
-GenderValue = Literal["female", "male", "non_binary", "prefer_not_to_say"]
+GenderValue = Literal["female", "male", "non_binary",  "prefer_not_to_say"]
 
 
 class UserCreate(BaseModel):
