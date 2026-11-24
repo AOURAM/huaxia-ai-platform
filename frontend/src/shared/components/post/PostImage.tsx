@@ -1,4 +1,4 @@
-import { resolveImageUrl } from '@/api/posts';
+import { resolveImageUrl } from '@/lib/http';
 
 interface PostImageProps {
   imageUrl: string | null;

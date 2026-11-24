@@ -1,4 +1,4 @@
-import { buildApiUrl, http } from '@/lib/http';
+import { http } from '@/lib/http';
 import type {
   ContentType,
   PageName,
@@ -147,11 +147,4 @@ export function reactToPost(postId: number, reactionType: 'like' | 'dislike') {
       body: JSON.stringify({ reaction_type: reactionType }),
     },
   );
-}
-
-export function resolveImageUrl(imageUrl: string | null) {
-  if (!imageUrl) return null;
-  if (imageUrl.startsWith('http')) return imageUrl;
-
-  return buildApiUrl(imageUrl);
 }
