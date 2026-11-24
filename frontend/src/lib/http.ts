@@ -1,7 +1,7 @@
 import { getStoredToken } from '@/lib/authStorage';
 import type { ApiErrorPayload } from '@/types/api';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || 'http://127.0.0.1:8000').replace(/\/+$/, '');
 
 export class ApiError extends Error {
   status: number;
@@ -14,7 +14,14 @@ export class ApiError extends Error {
 }
 
 export function buildApiUrl(path: string) {
-  return `${API_BASE_URL}${path}`;
+  return `${API_BASE_URL}/${path.replace(/^\/+/, '')}`;
+}
+
+export function resolveImageUrl(imageUrl: string | null) {
+  if (!imageUrl) return null;
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+
+  return buildApiUrl(imageUrl);
 }
 
 export async function http<T>(path: string, init?: RequestInit): Promise<T> {

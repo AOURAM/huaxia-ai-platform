@@ -15,11 +15,12 @@ import {
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { createComment } from '@/api/comments';
-import { getPostDetail, reactToPost, resolveImageUrl } from '@/api/posts';
+import { getPostDetail, reactToPost } from '@/api/posts';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useCurrentUser } from '@/features/profile/hooks/useCurrentUser';
 import { formatContentType, formatDate, formatPageName } from '@/lib/formatters';
+import { resolveImageUrl } from '@/lib/http';
 import { CategoryBadge } from '@/shared/components/post/CategoryBadge';
 import { ContentTypeBadge } from '@/shared/components/post/ContentTypeBadge';
 import { LocalUserAvatar } from '@/shared/components/user/LocalUserAvatar';

@@ -5,6 +5,7 @@ import { MapPin, Search } from 'lucide-react';
 import { CityMap } from '@/features/cities/components/CityMap';
 import { useCities, useCityPosts } from '@/features/cities/hooks/useCities';
 import { CreatePostCard } from '@/features/feed/components/CreatePostCard';
+import { resolveImageUrl } from '@/lib/http';
 
 import { PostList } from '@/shared/components/post/PostList';
 
@@ -30,6 +31,7 @@ export function CitiesPage() {
 
   const selectedCity =
     cities.find((city) => city.slug === selectedCitySlug) ?? cities[0] ?? null;
+  const cityImageUrl = resolveImageUrl(selectedCity?.image_url ?? null);
 
   const {
     data: cityPosts = [],
@@ -142,9 +144,9 @@ export function CitiesPage() {
             <section className="overflow-hidden rounded-2xl border border-brand-outline bg-white shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.4fr]">
                 <div className="relative min-h-[260px] overflow-hidden bg-brand-neutral-soft lg:min-h-full">
-                  {selectedCity.image_url ? (
+                  {cityImageUrl ? (
                     <img
-                      src={selectedCity.image_url}
+                      src={cityImageUrl}
                       alt={selectedCity.name}
                       className="h-full min-h-[260px] w-full object-cover lg:absolute lg:inset-0"
                     />
