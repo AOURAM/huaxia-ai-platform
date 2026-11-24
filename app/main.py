@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,8 +30,21 @@ app = FastAPI(
     version="0.1.0",
 )
 
+frontend_origin = os.getenv("FRONTEND_ORIGIN", "").strip().removesuffix("/")
+if frontend_origin:
+    parsed_origin = urlsplit(frontend_origin)
+    if (
+        parsed_origin.scheme not in {"http", "https"}
+        or not parsed_origin.hostname
+        or parsed_origin.username is not None
+        or any(character in frontend_origin for character in "*?#")
+        or parsed_origin.path
+    ):
+        raise ValueError("FRONTEND_ORIGIN must be an exact HTTP or HTTPS origin without a path.")
+
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=[frontend_origin] if frontend_origin else [],
     allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
     allow_credentials=True,
     allow_methods=["*"],

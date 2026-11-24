@@ -125,7 +125,7 @@ def save_uploaded_image(image: UploadFile | None) -> str | None:
             detail="Invalid image content type. Allowed: jpeg, png, webp, gif.",
         )
 
-    file_bytes = image.file.read()
+    file_bytes = image.file.read(MAX_IMAGE_SIZE_BYTES + 1)
 
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Uploaded image is empty.")
