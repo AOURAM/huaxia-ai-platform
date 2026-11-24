@@ -1,19 +1,22 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-load_dotenv()
+project_root = Path(__file__).resolve().parents[1]
+load_dotenv(project_root / ".env")
+load_dotenv(project_root / ".env.local")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
     raise RuntimeError(
-        "DATABASE_URL is not set. Create a .env file in the project root or set the environment variable."
+        "Set DATABASE_URL in the environment or in .env or .env.local at the project root."
     )
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(
     autocommit=False,

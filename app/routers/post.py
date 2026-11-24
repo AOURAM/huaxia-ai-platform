@@ -24,6 +24,7 @@ from app.schemas.post import (
     PostReactionRequest,
     PostResponse,
 )
+from app.services.ai_service import AI_ENABLED
 from app.services.embedding_service import generate_embedding
 from app.services.post_enrichment_service import enrich_post_ai
 
@@ -124,7 +125,7 @@ def save_uploaded_image(image: UploadFile | None) -> str | None:
             detail="Invalid image content type. Allowed: jpeg, png, webp, gif.",
         )
 
-    file_bytes = image.file.read()
+    file_bytes = image.file.read(MAX_IMAGE_SIZE_BYTES + 1)
 
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Uploaded image is empty.")
@@ -201,6 +202,17 @@ def update_search_vector(db: Session, post_id: int) -> None:
     )
 
 
+def reset_post_enrichment(post: Post) -> None:
+    post.category_id = None
+    post.ai_status = "pending" if AI_ENABLED else "disabled"
+    post.ai_error = None
+    post.ai_analysis = "AI enrichment is pending." if AI_ENABLED else None
+    post.ai_updated_at = datetime.now(timezone.utc)
+    post.summary = "AI summary is being generated." if AI_ENABLED else None
+    post.tags = json.dumps([])
+    post.embedding = None
+
+
 def serialize_post_response(post: Post) -> dict:
     return {
         "id": post.id,
@@ -275,17 +287,10 @@ def create_post(
         page_name=page_name,
         content_type=content_type,
         city_id=validated_city_id,
-        category_id=None,
-        ai_status="pending",
-        ai_error=None,
-        ai_analysis="AI enrichment is pending.",
-        ai_updated_at=datetime.now(timezone.utc),
-        summary="AI summary is being generated.",
-        tags=json.dumps([]),
-        embedding=None,
         image_url=image_url,
         user_id=current_user.id,
     )
+    reset_post_enrichment(new_post)
 
     db.add(new_post)
     db.commit()
@@ -296,7 +301,8 @@ def create_post(
     db.commit()
     db.refresh(new_post)
 
-    background_tasks.add_task(enrich_post_ai, new_post.id, content)
+    if AI_ENABLED:
+        background_tasks.add_task(enrich_post_ai, new_post.id, content)
 
     return serialize_post_response(new_post)
 
@@ -389,7 +395,7 @@ def search_posts(
             float(post["keyword_score"]) if post["keyword_score"] is not None else 0.0
         )
         keyword_score = min(raw_keyword_score * 20, 1.0)
-        final_score = (semantic_score * 0.7) + (keyword_score * 0.3)
+        final_score = (semantic_score * 0.7) + (keyword_score * 0.3) if AI_ENABLED else keyword_score
 
         scored_posts.append(
             {
@@ -478,7 +484,7 @@ def search_posts_globally(
             float(post["keyword_score"]) if post["keyword_score"] is not None else 0.0
         )
         keyword_score = min(raw_keyword_score * 20, 1.0)
-        final_score = (semantic_score * 0.7) + (keyword_score * 0.3)
+        final_score = (semantic_score * 0.7) + (keyword_score * 0.3) if AI_ENABLED else keyword_score
 
         if final_score < request.min_score:
             continue
@@ -747,14 +753,7 @@ def update_post(
         post.image_url = save_uploaded_image(image)
 
     if content_changed:
-        post.category_id = None
-        post.ai_status = "pending"
-        post.ai_error = None
-        post.ai_analysis = "AI enrichment is pending."
-        post.ai_updated_at = datetime.now(timezone.utc)
-        post.summary = "AI summary is being generated."
-        post.tags = json.dumps([])
-        post.embedding = None
+        reset_post_enrichment(post)
 
     db.commit()
     db.refresh(post)
@@ -764,7 +763,7 @@ def update_post(
         db.commit()
         db.refresh(post)
 
-    if content_changed:
+    if content_changed and AI_ENABLED:
         background_tasks.add_task(enrich_post_ai, post.id, post.content)
 
     return serialize_post_response(post)

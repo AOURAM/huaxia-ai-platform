@@ -32,6 +32,7 @@ uploads/
 !uploads/.gitkeep
 
 # Frontend dependencies and build output
+/node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
@@ -48,3 +49,5 @@ frontend/.env.*
 # OS files
 .DS_Store
 Thumbs.db
+.neon
+node_modules/
