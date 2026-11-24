@@ -1,15 +1,10 @@
 import os
 from logging.config import fileConfig
-from pathlib import Path
 
 from alembic import context
-from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-load_dotenv(PROJECT_ROOT / ".env")
-
-from app.database import Base
+from app.database import Base, DATABASE_URL
 
 # Import all models so Alembic can detect the full schema.
 import app.models.user
@@ -23,14 +18,7 @@ import app.models.user_interest
 
 config = context.config
 
-database_url = os.getenv("DATABASE_URL")
-
-if not database_url:
-    raise RuntimeError(
-        "DATABASE_URL is not set. Create a .env file in the project root."
-    )
-
-config.set_main_option("sqlalchemy.url", database_url)
+database_url = os.getenv("DATABASE_URL_UNPOOLED") or DATABASE_URL
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

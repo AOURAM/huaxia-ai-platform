@@ -1,19 +1,23 @@
 import json
 import os
 
-from anthropic import Anthropic
-
+AI_ENABLED = os.getenv("HUAXIA_AI_ENABLED", "true").strip().lower() == "true"
 _client = None
 
 
 def get_client():
     global _client
 
+    if not AI_ENABLED:
+        return None
+
     if _client is None:
         api_key = os.getenv("ANTHROPIC_API_KEY")
 
         if not api_key:
             return None
+
+        from anthropic import Anthropic
 
         _client = Anthropic(api_key=api_key)
 

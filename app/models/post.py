@@ -1,4 +1,5 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -26,7 +27,7 @@ class Post(Base):
     tags = Column(Text, nullable=True)
 
     embedding = Column(Text, nullable=True)
-    search_vector = Column(Text, nullable=True)
+    search_vector = Column(TSVECTOR, nullable=True)
 
     image_url = Column(String(500), nullable=True)
 
