@@ -3,6 +3,8 @@ from sqlalchemy import Column, Integer, String
 from app.core.avatar import build_avatar_url
 from app.database import Base
 
+DEMO_PROFILE_DOMAIN = "demo.huaxia.local"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -17,6 +19,10 @@ class User(Base):
     gender = Column(String(30), nullable=True)
     avatar_style = Column(String(50), nullable=True)
     avatar_seed = Column(String(120), nullable=True)
+
+    @property
+    def is_demo_profile(self) -> bool:
+        return self.email.casefold().endswith(f"@{DEMO_PROFILE_DOMAIN}")
 
     @property
     def avatar_url(self) -> str:

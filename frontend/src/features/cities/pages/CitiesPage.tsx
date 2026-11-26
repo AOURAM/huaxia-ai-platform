@@ -22,6 +22,7 @@ export function CitiesPage() {
   const [query, setQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedCitySlug, setSelectedCitySlug] = useState<string | null>(null);
+  const hasCityFilters = Boolean(query.trim()) || selectedRegion !== 'all';
 
   const {
     data: cities = [],
@@ -113,11 +114,29 @@ export function CitiesPage() {
 
         {!citiesLoading && !citiesError && cities.length === 0 ? (
           <div className="rounded-xl border border-dashed border-brand-outline bg-white p-10 text-center">
-            <h2 className="mb-2 font-serif text-3xl font-bold">No cities found</h2>
+            <h2 className="mb-2 font-serif text-3xl font-bold">
+              {hasCityFilters ? 'No cities match your filters' : 'No cities are available yet'}
+            </h2>
 
             <p className="text-brand-on-surface/60">
-              Add cities from Swagger using <strong>POST /cities/</strong>.
+              {hasCityFilters
+                ? 'Try a different search or region.'
+                : 'City guides and discussions will appear here as the catalog grows.'}
             </p>
+
+            {hasCityFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery('');
+                  setSelectedRegion('all');
+                  setSelectedCitySlug(null);
+                }}
+                className="mt-4 rounded-full border border-brand-outline px-5 py-2 text-sm font-bold text-brand-primary hover:border-brand-primary"
+              >
+                Clear filters
+              </button>
+            ) : null}
           </div>
         ) : null}
 

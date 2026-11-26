@@ -86,7 +86,7 @@ def login_user(
 ):
     db_user = db.query(User).filter(User.email == form_data.username).first()
 
-    if not db_user:
+    if db_user is None or db_user.is_demo_profile:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
