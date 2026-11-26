@@ -1,5 +1,5 @@
 import { Image, Loader2, MapPin, Send, Sparkles, X } from 'lucide-react';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent, type Ref } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { createPost } from '@/api/posts';
@@ -13,11 +13,13 @@ interface CreatePostCardProps {
   pageName?: PageName;
   cityId?: number | null;
   compact?: boolean;
+  titleInputRef?: Ref<HTMLInputElement>;
 }
 
 export function CreatePostCard({
   pageName = 'daily_life',
   cityId = null,
+  titleInputRef,
 }: CreatePostCardProps) {
   const { user } = useAuth();
   const { data: freshUser } = useCurrentUser();
@@ -85,6 +87,7 @@ export function CreatePostCard({
 
         <div className="min-w-0 flex-1">
           <input
+            ref={titleInputRef}
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Share an insight, question, or student experience..."

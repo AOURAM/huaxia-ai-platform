@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { Home, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { getPersonalizedFeed, searchPosts } from '@/api/posts';
+import { getAllPosts, getPersonalizedFeed, searchPosts } from '@/api/posts';
 import { CreatePostCard } from '@/features/feed/components/CreatePostCard';
 import { TopPostsPanel } from '@/features/feed/components/TopPostsPanel';
 import { PostList } from '@/shared/components/post/PostList';
@@ -15,13 +15,22 @@ export function HomeFeedPage() {
   const [searchResults, setSearchResults] = useState<Post[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const postTitleInput = useRef<HTMLInputElement>(null);
+  const [showAllPosts, setShowAllPosts] = useState(false);
 
   const personalizedFeedQuery = useQuery({
     queryKey: queryKeys.personalizedFeed,
     queryFn: getPersonalizedFeed,
+    enabled: !showAllPosts,
   });
 
-  const posts = personalizedFeedQuery.data ?? [];
+  const allPostsQuery = useQuery({
+    queryKey: queryKeys.posts,
+    queryFn: getAllPosts,
+    enabled: showAllPosts,
+  });
+  const feedQuery = showAllPosts ? allPostsQuery : personalizedFeedQuery;
+  const posts = feedQuery.data ?? [];
   const visiblePosts = searchResults ?? posts;
 
   const handleSearch = async () => {
@@ -127,23 +136,40 @@ export function HomeFeedPage() {
 ) : null}
         </motion.section>
 
-        <CreatePostCard />
+        <CreatePostCard titleInputRef={postTitleInput} />
 
         <section className="rounded-3xl border border-brand-outline bg-white p-6 shadow-sm">
-          {personalizedFeedQuery.isLoading ? (
+          <div className="mb-4 flex gap-2" aria-label="Feed view">
+            {[false, true].map((all) => (
+              <button
+                key={String(all)}
+                type="button"
+                aria-pressed={showAllPosts === all}
+                onClick={() => {
+                  setShowAllPosts(all);
+                  clearSearch();
+                }}
+                className="rounded-xl border border-brand-outline px-4 py-2 text-sm font-bold text-brand-primary aria-pressed:border-brand-primary"
+              >
+                {all ? 'All posts' : 'For you'}
+              </button>
+            ))}
+          </div>
+
+          {feedQuery.isLoading ? (
             <div className="rounded-2xl border border-dashed border-brand-outline bg-brand-neutral-soft p-8 text-center text-sm font-bold text-brand-on-surface/55">
               Loading posts...
             </div>
           ) : null}
 
-          {personalizedFeedQuery.isError ? (
+          {feedQuery.isError ? (
             <div className="rounded-2xl border border-brand-danger/20 bg-brand-danger/10 p-8 text-center text-sm font-bold text-brand-danger">
               Could not load posts. Check the backend server.
             </div>
           ) : null}
 
-          {!personalizedFeedQuery.isLoading &&
-          !personalizedFeedQuery.isError &&
+          {!feedQuery.isLoading &&
+          !feedQuery.isError &&
           visiblePosts.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-brand-outline bg-brand-neutral-soft p-10 text-center">
               <h3 className="font-serif text-2xl font-black text-brand-on-surface">
@@ -153,13 +179,23 @@ export function HomeFeedPage() {
               <p className="mt-2 text-sm text-brand-on-surface/55">
                 {searchResults
                   ? 'Clear the search or try a different natural-language query.'
-                  : 'Create the first discussion above.'}
+                  : 'Start a discussion with a question, tip, or student experience.'}
               </p>
+
+              {!searchResults ? (
+                <button
+                  type="button"
+                  onClick={() => postTitleInput.current?.focus()}
+                  className="mt-4 rounded-xl border border-brand-outline px-4 py-2 text-sm font-bold text-brand-primary hover:border-brand-primary"
+                >
+                  Write a post
+                </button>
+              ) : null}
             </div>
           ) : null}
 
-          {!personalizedFeedQuery.isLoading &&
-          !personalizedFeedQuery.isError &&
+          {!feedQuery.isLoading &&
+          !feedQuery.isError &&
           visiblePosts.length > 0 ? (
             <AnimatePresence mode="popLayout">
               <PostList posts={visiblePosts} />
